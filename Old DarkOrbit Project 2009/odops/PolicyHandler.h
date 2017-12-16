@@ -20,22 +20,22 @@ typedef boost::asio::ip::tcp tcp_t;
 
 // This class is derived from boost.org and some help of stackoverflow
 class CPolicyHandler :
-	public boost::enable_shared_from_this<CPolicyHandler>
+	public std::enable_shared_from_this<CPolicyHandler>
 {
 	// Represents the socket
-	tcp_t::socket socket_;
+	tcp_t::socket m_socket;
 	//text to write
-	std::string string_; // send
+	std::string m_sendstring; // send
 						 //received text
-	std::string information;
+	std::string m_information;
 	char buf[1024]; // received
 
-	boost::asio::streambuf buffer;
+	boost::asio::streambuf m_buffer;
 
 	unsigned short m_port;
 public:
 	// Keeping it short
-	typedef boost::shared_ptr<CPolicyHandler> tcppointer;
+	typedef std::shared_ptr<CPolicyHandler> tcppointer;
 
 	// Creates a smart connection pointer to an object of this type.
 	static tcppointer createConnection(boost::asio::io_service& io_service, unsigned short port);
@@ -45,9 +45,11 @@ public:
 
 	// Starting to asynchrounously write data
 	void start();
+
+	~CPolicyHandler();
 private:
 	// We are going to use the ctor of our socket member
-	CPolicyHandler(boost::asio::io_service& io_service, unsigned short& port) : socket_(io_service) { m_port = port; }
+	CPolicyHandler(boost::asio::io_service& io_service, unsigned short& port) : m_socket(io_service) { m_port = port; }
 
 	void handle_write(const boost::system::error_code& ec, size_t bytes);
 

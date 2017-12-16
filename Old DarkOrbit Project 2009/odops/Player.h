@@ -2,10 +2,7 @@
 #define PLAYER_H
 #include <string>
 
-#include "Map.h"
-
-class Map;
-//unused
+/*unused
 struct Player {
 	pos_t		x;
 	pos_t		y;
@@ -14,12 +11,44 @@ struct Player {
 	shield_t	shield;
 	shield_t	max_shield;
 	factionid_t company;
-	Map			currentMap;
+	CMap			currentMap;
+};*/
+/*
+std::string updateItems(level_t droneRepairCpuLevel,
+bool diploScanCpu, level_t jumpCpuLevel, lasertype_t rebuyAmmoCpuAmmoType, 
+bool hasRepairBot, bool hasOreSellDrone, bool hasRtDoublerUNUSED, bool hasSmartBombCpu, 
+bool hasInstashieldCpu, level_t mineBoostCpuLevel, level_t aimCpuLevel, bool hasArolCpu, 
+bool hasCloakCpu);
+
+*/
+struct CItems
+{
+	level_t droneRepairCpuLevel;
+	bool hasOiploScan;
+	level_t jumpCpuLevel;
+	lasertype_t rebuyAmmoCpuAmmoType;
+	//bool on packet
+	level_t repairBotLevel;
+	bool hasOreSellDrone;
+	bool hasRtDoubler;
+	bool hasSmartBombCpu;
+	bool hasInstashieldCpu;
+	level_t mineBoostCpuLevel;
+	level_t aimCpuLevel;
+	bool hasArolCpu;
+	bool hasCloakCpu;
 };
-
-
-class PlayerInfo {
+//YET UNUSED
+struct CConfig
+{
+	CItems items;
+	shield_t shield;
+	shield_t maxshield;
+};
+class CPlayerInfo {
 public:
+	CItems			items;
+	bool			isadmin;
 	shipid_t		shipid;
 	speed_t			speed;
 	shield_t		shd;

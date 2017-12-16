@@ -1,6 +1,7 @@
 #ifndef USERS_H
 #define USERS_H
-struct Users {
+
+struct CUsers {
 	//idk
 };
 #endif

@@ -18,10 +18,11 @@ public:
 	/* default constructor: normal i/o service and a port where the server is running on */
 	CGameServer(boost::asio::io_service& io_service, unsigned short& port) : acceptor_(io_service, tcp_t::endpoint(tcp_t::v4(), port)) {
 		m_port = port;
-		start_accept();
+		start();
 	}
 private:
-
+	/* Start the asynchronous operations of the server */
+	void start();
 	/* Accepts the start from an incoming connection */
 	void start_accept();
 

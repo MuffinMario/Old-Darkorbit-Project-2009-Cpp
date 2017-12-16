@@ -1,7 +1,7 @@
 #include "FileReader.h"
 
 
-std::string FileReader::getStr(std::string path)
+std::string CFileReader::getStr(std::string path)
 {
 	inputstr.open(path);
 	while (!inputstr.eof()) {

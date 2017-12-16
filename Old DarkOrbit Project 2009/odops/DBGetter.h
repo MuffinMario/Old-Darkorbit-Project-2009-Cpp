@@ -5,73 +5,83 @@
 #include <iostream>
 #include <utility>
 #include <string>
+//rethink about mutex, pro: - it prevents any memory leak con: - it could easily be done externally (mutex only used on execute() so it doesnt provide full protection)
+#include <mutex>
 
 #include <boost\lexical_cast.hpp>
 
-#include <mysql_connection.h>
-#include <mysql_error.h>
-#include <mysql_driver.h>
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
+extern "C" {
+#include <mysql.h>
+}
 
 #include "Defines.h"
 
-class DBGetter {
-	static sql::mysql::MySQL_Driver*	driver;
-	sql::Connection*					con;
-	sql::Statement*						command;
-	sql::ResultSet*						result;
+extern "C" {
 
-	id_t			id;
-	sql::SQLString	column;
-	sql::SQLString	from;
-	sql::SQLString	database;
+	/* By Default, DBGetter is not (totally) thread safe! Implement externally.
+		Note: after adding mysql_free_result before creating the (next) result due to it creating a memory leak, I noticed that after around 1000 getString()s 
+		memory rises from about 200 KB to around 500 KB in weird ticks
+	*/
+	class CDBGetter {
+		/* Database related stuff */
 
-public:
-	DBGetter() = delete;
-	DBGetter(sql::SQLString database, sql::SQLString column, sql::SQLString table, id_t id) {
-		this->database	= database;
-		this->id		= id;
-		this->column	= column;
-		this->from		= table;
-	}
-	~DBGetter()
-	{
-		delete con;
-		delete command;
-		delete result;
-	}
-	DBGetter(DBGetter&& dbmoved)	 = default;
-	DBGetter(const DBGetter& dbcopy) = default;
+		MYSQL_RES* result;
+		MYSQL_ROW row;
 
-	void changeQuery(sql::SQLString column, sql::SQLString table, id_t id);
-	void changeColumn(sql::SQLString column);
-	void changeTable(sql::SQLString table);
-	void changeId(id_t id);
+		/* User Information */
+		id_t  id;
+		char* id_str; //"clanID","id", etc.;a clear representation of the primary key name
+		char* column;
+		char* from;
+		char* database;
 
-	//returns an integer from the query
-	int					getInt();
-	//returns a 64-bit integer from the query
-	long long			getInt64();
-	//returns an unsigned integer from the query
-	unsigned int		getUInt();
-	//returns an unsigned 64-bit integer from the query
-	unsigned long long	getUInt64();
-	//returns a double from the query
-	double				getDouble();
-	//returns a boolean from the query
-	bool				getBoolean();
-	//returns the SQLL-String
-	sql::SQLString		getString();
+	public:
+		CDBGetter(void) = delete;
+		CDBGetter(char* database, char* column, char* table, char* id_str, id_t id) {
+			this->database = database;
+			this->id = id;
+			this->id_str = id_str;
+			this->column = column;
+			this->from = table;
+		}
+		~CDBGetter(void)
+		{
+			free();
+		}
+		CDBGetter(CDBGetter&& dbmoved) = default;
+		CDBGetter(const CDBGetter& dbcopy) = default;
 
-	/* sets the driver and connects to it, it also sets the scheme to the database*/
-	void connect();
-private:
-	/*creates and executes query then iterates to the first row and returns its function (sql::ResultSet::first())
-	  scheme: SELECT x FROM y WHERE id = z ORDER BY id ASC
-	 */
-	bool execute();
-};
+		void free();
+		void changeQuery(char* column, char* table, char* id_str, id_t id);
+		void changeColumn(char* column);
+		void changeTable(char* table);
+		void changeIdString(char* id_str);
+		void changeId(id_t id);
+
+		//returns an integer from the query
+		int					getInt(void);
+		//returns a 64-bit integer from the query
+		long long			getInt64(void);
+		//returns an unsigned integer from the query
+		unsigned int		getUInt(void);
+		//returns an unsigned 64-bit integer from the query
+		unsigned long long	getUInt64(void);
+		//returns a double from the query
+		double				getDouble(void);
+		//returns a boolean from the query
+		bool				getBoolean(void);
+		//returns the C-String
+		char*				getString(void);
+
+		/* sets the driver and connects to it, it also sets the scheme to the database*/
+		bool init(void);
+		bool connect(void);
+	private:
+		/*creates and executes query then iterates to the first row and returns its function (sql::ResultSet::first())
+		  scheme: SELECT x FROM y WHERE id = z ORDER BY id ASC
+		 */
+		void print_db_err(char*);
+		bool execute(void);
+	};
+}
 #endif

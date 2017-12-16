@@ -1,6 +1,6 @@
 #include "MovementManager.h"
 
-void MovementManager::move(Position_t& planned)
+void CMovementManager::move(Position_t& planned)
 {
 	pos_t	tmpz;
 	int		delta_x;
@@ -19,7 +19,7 @@ void MovementManager::move(Position_t& planned)
 								static_cast<double>(tmpz) / static_cast<double>(speed) * 1000.0); //distance u / speed u/ms
 }
 
-void MovementManager::move(pos_t x, pos_t y)
+void CMovementManager::move(pos_t x, pos_t y)
 {
 	pos_t		tmpz;
 	int			delta_x;
@@ -28,28 +28,28 @@ void MovementManager::move(pos_t x, pos_t y)
 	local_pos	= get_current_position();
 	planned_pos = std::make_pair(x, y);
 
-	delta_x = std::abs(planned_pos.first  - local_pos.first);
-	delta_y = std::abs(planned_pos.second - local_pos.second);
+	delta_x = planned_pos.first  - local_pos.first;
+	delta_y = planned_pos.second - local_pos.second;
 
-	tmpz	= std::sqrt((delta_x * delta_x) + (delta_y * delta_y));
+	tmpz	= std::sqrt((delta_x * delta_x) + (delta_y * delta_y)); // c² = a² + b² amirite friends
 
 	time_last_call		 = get_current_time();
 	time_for_destination = static_cast<long long>(
 								static_cast<double>(tmpz) / static_cast<double>(speed) * 1000.0);// (time_last_call + tmpz * (speed / 1000)) - time_last_call;
 
-	std::cout << "=============" << std::endl
+	/*std::cout << "=============" << std::endl
 		<< "tmpz: " << tmpz << std::endl
 		<< "time_for_destination: " << time_for_destination << std::endl
 		<< "time it takes when i calculate it this way: " << tmpz * speed * 1000 << std::endl
-		<< "=============" << std::endl;
+		<< "=============" << std::endl;*/
 }
 
-MovementManager::duration_t MovementManager::get_time_for_destination()
+CMovementManager::duration_t CMovementManager::get_time_for_destination()
 {
 	return time_for_destination;
 }
 
-Position_t MovementManager::get_current_position() const
+Position_t CMovementManager::get_current_position() const
 {
 	duration_t now_call = get_current_time();
 	duration_t timedistance = now_call - time_last_call;
@@ -102,7 +102,7 @@ Position_t MovementManager::get_current_position() const
 	return Position_t(tmpx, tmpy);
 }
 
-pos_t MovementManager::get_current_position_x() const
+pos_t CMovementManager::get_current_position_x() const
 {
 	duration_t now_call		= get_current_time();
 	duration_t timedistance = now_call - time_last_call;
@@ -135,7 +135,7 @@ pos_t MovementManager::get_current_position_x() const
 	return tmpx;
 }
 
-pos_t MovementManager::get_current_position_y() const
+pos_t CMovementManager::get_current_position_y() const
 {
 	duration_t now_call		 = get_current_time();
 	duration_t timedistance	 = now_call - time_last_call;
@@ -168,12 +168,17 @@ pos_t MovementManager::get_current_position_y() const
 	return tmpy;
 }
 
-void MovementManager::set_speed(speed_t speed)
+Position_t CMovementManager::get_planned_position() const
 {
-	this->speed = speed;
+	return planned_pos;
 }
 
-void MovementManager::reset(Position_t & now_position)
+void CMovementManager::set_speed(speed_t speed)
+{
+	this->speed = speed*0.97;
+}
+
+void CMovementManager::reset(Position_t & now_position)
 {
 	local_pos	= now_position;
 	planned_pos	= local_pos;
@@ -182,7 +187,7 @@ void MovementManager::reset(Position_t & now_position)
 	time_for_destination = 0ll;
 }
 
-void MovementManager::reset(pos_t x, pos_t y)
+void CMovementManager::reset(pos_t x, pos_t y)
 {
 	local_pos	= std::make_pair(x, y);
 	planned_pos = local_pos;

@@ -1,22 +1,23 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-enum RocketType {
+enum ERocketType {
 	R310 = 1,
 	PLT2026,
 	PLT2021,
 	WIZ
 };
 
-enum LaserType {
+enum ELaserColor {
 	RED,
 	BLUE,
 	GREEN,
+	WHITE,
 	SAB,
 	FRENCHFRIES
 };
 
-enum FactionType {
+enum EFactionType {
 	NONE,
 	MMO,
 	EIC,

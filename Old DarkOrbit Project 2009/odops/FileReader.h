@@ -6,7 +6,7 @@
 #include <fstream>
 
 //expandable to your wishes (not that im lazy or something)
-class FileReader
+class CFileReader
 {
 	std::ifstream	inputstr;
 	std::string		path;

@@ -20,9 +20,11 @@
 //		- ...except the mystical exponential speed lowerment of the client
 //			'-> the further the way, the slower the client, and we simply don't know why
 //				(see DoAction_30 this.speed = this.Tspeed / framerate / 0.97; )
+//				2017:	changing it to *0.97 is ALMOST SIMILAR, but once you move with the minimap, the position of the server calculation is always faster than the client
+//						but once only using the real map around your ship, its almost too similar
 ///////////////////////////////////////////
-class MovementManager {
-	typedef decltype(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) duration_t;
+class CMovementManager {
+	typedef long long duration_t;
 	
 	Position_t	local_pos;
 	Position_t	planned_pos;
@@ -31,9 +33,9 @@ class MovementManager {
 	duration_t	time_for_destination;
 
 public:
-	MovementManager(Position_t local_pos,speed_t speed) : local_pos(local_pos), planned_pos(local_pos),
-															speed(speed), time_last_call(get_current_time()) { }
-	MovementManager(pos_t local_pos_x, pos_t local_pos_y,speed_t speed) : MovementManager(std::make_pair(local_pos_x, local_pos_y),speed) { }
+	CMovementManager(Position_t local_pos,speed_t speed) : local_pos(local_pos), planned_pos(local_pos),
+															speed(speed*0.97), time_last_call(get_current_time()) { }
+	CMovementManager(pos_t local_pos_x, pos_t local_pos_y,speed_t speed) : CMovementManager(std::make_pair(local_pos_x, local_pos_y),speed) { }
 
 	void		move(Position_t& planned);
 	void		move(pos_t x, pos_t y);
@@ -43,6 +45,7 @@ public:
 	Position_t	get_current_position() const;
 	pos_t		get_current_position_x() const;
 	pos_t		get_current_position_y() const;
+	Position_t  get_planned_position() const;
 
 	void		set_speed(speed_t speed);
 	void		reset(Position_t& now_position);

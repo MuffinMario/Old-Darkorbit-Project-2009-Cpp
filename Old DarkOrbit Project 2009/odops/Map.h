@@ -5,46 +5,36 @@
 #include <string>
 #include <regex>
 #include <vector>
+#include <mutex>
 #include <boost\lexical_cast.hpp>
-#include <mysql_connection.h>
-#include <mysql_error.h>
-#include <mysql_driver.h>
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
+#include <map>
 
 #include "Enums.h"
 #include "Portal.h"
 #include "Station.h"
 #include "DBGetter.h"
-#include "DatabaseUtils.h"
 
-extern DBGetter database_get;
 
-static std::mutex local_mutex;
-class Map {
-	std::vector<Portal>		portals;
-	std::vector<Station>	stations;
+class CMap {
+	std::vector<CPortal>		portals;
+	std::vector<CStation>	stations;
 	map_t					mapID;
+public:
 	const static size_t		MAPSIZE_NORMAL_X = 21000;
 	const static size_t		MAPSIZE_NORMAL_Y = 14100;
 	const static size_t		MAPSIZE_BIG_X	 = 42000;
 	const static size_t		MAPSIZE_BIG_Y	 = 28200;
-public:
-	Map(map_t mid) {
+	CMap()
+	{
+		mapID = 0;
+
+		//dont generate!
+	}
+	CMap(map_t mid) {
 		mapID = mid;
 
 		generateObjects();
 	}
-
-	/*mutex is not going to move anytime soon
-	Map& operator=(const Map& map) { 
-		portals = map.portals;
-		stations = map.stations;
-		mapID = map.mapID;
-		return *this;
-	}*/
 
 	void generateObjects() {
 		portals.clear();
@@ -57,41 +47,36 @@ public:
 	map_t getMapId() const {
 		return mapID; 
 	}
-	std::vector<Station> getStations() const { 
+	std::vector<CStation> getStations() const { 
 		return stations; 
 	}
-	std::vector<Portal> getPortals() const { 
+	std::vector<CPortal> getPortals() const { 
 		return portals; 
 	}
 
 	void setMapId(map_t mapID) { 
 		this->mapID = mapID; 
 	}
-	void setStations(std::vector<Station>& stations) { 
+	void setStations(std::vector<CStation>& stations) { 
 		this->stations = stations; 
 	}
-	void setPortals(std::vector<Portal>& portals) {
+	void setPortals(std::vector<CPortal>& portals) {
 		this->portals = portals; 
 	} 
 
-private:
-	void initPortals() {
-		try {
-			std::string			regexdbget;
-
-			{
-				std::lock_guard<std::mutex> lock(local_mutex);
-				database_get.changeQuery("Portals", "maps", mapID);
-				regexdbget = database_get.getString();
-			}
-
-			regexPortalFilter(regexdbget);
+	static const std::map<map_t, CMap> generateMapMap()
+	{
+		std::map<map_t, CMap> m;
+		for (int i = 1; i <= 29; i++)
+		{
+			m[i] = CMap(i);
 		}
-		catch (sql::SQLException& ex) {
-			std::cerr << "[err] Error connecting to the database: " << ex.what() << std::endl;
-		}
-
+		m[42] = CMap(42);
+		return m;
 	}
+
+private:
+	void initPortals();
 
 	void initStations() {
 		//hard-coded
@@ -108,27 +93,27 @@ private:
 		if (mapID == 1)
 			stations.emplace_back(1, "mmoBase", 
 				stationSize - g_offsetX, 
-				stationSize - g_offsetY, FactionType::MMO);
+				stationSize - g_offsetY, EFactionType::MMO);
 		else if (mapID == 5)
 			stations.emplace_back(1, "eicBase",
-				MAPSIZE_NORMAL_X - stationSize - g_offsetX,
-				stationSize - g_offsetY, FactionType::EIC);
+				MAPSIZE_NORMAL_X - stationSize * 1.5 - g_offsetX,
+				stationSize - g_offsetY, EFactionType::EIC);
 		else if (mapID == 9)
 			stations.emplace_back(1, "vruBase",
 				MAPSIZE_NORMAL_X - stationSize - g_offsetX,
-				MAPSIZE_NORMAL_Y - stationSize - g_offsetY, FactionType::VRU);
+				MAPSIZE_NORMAL_Y - stationSize - g_offsetY, EFactionType::VRU);
 		else if (mapID == 20)
 			stations.emplace_back(1, "mmoBase2",
 				stationSize - g_offsetX,
-				(MAPSIZE_NORMAL_Y - stationSize ) / 2- g_offsetY, FactionType::MMO);
+				(MAPSIZE_NORMAL_Y - stationSize ) / 2- g_offsetY, EFactionType::MMO);
 		else if (mapID == 24)
 			stations.emplace_back(1, "eicBase2",
 				MAPSIZE_NORMAL_X / 2,
-				stationSize - g_offsetY, FactionType::EIC);
+				stationSize - g_offsetY, EFactionType::EIC);
 		else if (mapID == 28)
 			stations.emplace_back(1, "vruBase2",
 				MAPSIZE_NORMAL_X - stationSize - g_offsetX,
-				(MAPSIZE_NORMAL_Y - stationSize) / 2 - g_offsetY, FactionType::VRU);
+				(MAPSIZE_NORMAL_Y - stationSize) / 2 - g_offsetY, EFactionType::VRU);
 	}
 
 	void regexPortalFilter(std::string regextxt) {
@@ -143,7 +128,7 @@ private:
 		// loop 1: " 5 7 1"
 		// loop 2: " 7 1"
 		// ...
-		while (std::regex_search(regextxt, m, expr)) { 
+		while (std::regex_search(regextxt, m, expr)) {
 			portals.emplace_back(lexical_cast<portalid_t>(m[1]), 
 				lexical_cast<pos_t>(m[2]), lexical_cast<pos_t>(m[3]), 
 				lexical_cast<pos_t>(m[4]), lexical_cast<pos_t>(m[5]), 

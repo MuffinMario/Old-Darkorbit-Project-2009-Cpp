@@ -21,19 +21,19 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B8347E38-818C-47CC-B785-30115E700188}</ProjectGuid>
     <RootNamespace>odops</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -68,22 +68,38 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <TargetName>DarkOrbit 2009 GameServer (Debug)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>DarkOrbit 2009 GameServer</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>G:\mysql-connector\include;C:\SFML3264\SFML232_32\include;C:\boost\boost160</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CPPCONN_PUBLIC_FUNC=;SFML_STATIC;_SCL_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\Cplusplus_libraries\boost160;..\..\..\C_libraries\MySQLConnectorC\x86_32\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>
       </AdditionalUsingDirectories>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <AdditionalOptions>/ZI %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>G:\mysql-connector\lib;C:\SFML3264\SFML232_32\lib;C:\boost\boost160\stage\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mysqlcppconn.lib;libboost_system-vc140-mt-gd-1_60.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\Cplusplus_libraries\boost160\stage\lib;..\..\..\C_libraries\MySQLConnectorC\x86_32\lib\vs14</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mysqlclient-d.lib;libboost_system-vc140-mt-gd-1_60.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -100,14 +116,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>G:\mysql-connector\include;C:\SFML3264\SFML232_32\include;C:\boost\boost160</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CPPCONN_PUBLIC_FUNC=;SFML_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\Cplusplus_libraries\boost160;..\..\..\C_libraries\MySQLConnectorC\x86_32\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>G:\mysql-connector\lib;C:\SFML3264\SFML232_32\lib;C:\boost\boost160\stage\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mysqlcppconn.lib;libboost_system-vc140-mt-1_60.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\Cplusplus_libraries\boost160\stage\lib;..\..\..\C_libraries\MySQLConnectorC\x86_32\lib\vs14</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mysqlclient.lib;libboost_system-vc140-mt-1_60.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -125,15 +141,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AlienHandler.h" />
     <ClInclude Include="AsyncThread.h" />
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="coutcolor.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DatabaseUtils.h" />
+    <ClInclude Include="DBUpdater.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="DamageManager.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="FileWriter.h" />
     <ClInclude Include="Handler.h" />
+    <ClInclude Include="Mob.h" />
+    <ClInclude Include="MobWrapper.h" />
     <ClInclude Include="PlayerHandler.h" />
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="DBGetter.h" />
@@ -146,15 +166,22 @@
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Portal.h" />
     <ClInclude Include="PolicyServer.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SessionsManager.h" />
     <ClInclude Include="Station.h" />
     <ClInclude Include="UsersDB.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="coutcolor.tpp" />
     <ClCompile Include="DatabaseUtils.cpp" />
     <ClCompile Include="DamageManager.cpp" />
+    <ClCompile Include="DBUpdater.cpp" />
+    <ClCompile Include="Defines.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="FileWriter.cpp" />
+    <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Mob.cpp" />
     <ClCompile Include="PlayerHandler.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="DBGetter.cpp" />
@@ -165,6 +192,18 @@
     <ClCompile Include="PolicyHandler.cpp" />
     <ClCompile Include="PolicyServer.cpp" />
     <ClCompile Include="SessionsManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="Defines.tpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="C:\xampp\htdocs\favicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="odops.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

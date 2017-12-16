@@ -16,19 +16,16 @@
 
 #include <boost\lexical_cast.hpp>
 #include <boost\asio.hpp>
+#include <boost\asio\steady_timer.hpp>
 #include <boost\algorithm\string.hpp>
+#include <boost\algorithm\clamp.hpp>
+#include <boost\math\special_functions\round.hpp>
 #include <boost\bind.hpp>
 #include <boost\shared_ptr.hpp>
 #include <boost\enable_shared_from_this.hpp>
 #include <boost\thread.hpp>
 
-#include <mysql_connection.h>
-#include <mysql_error.h>
-#include <mysql_driver.h>
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
+#include <windows.h>
 
 #include "SessionsManager.h"
 #include "FileReader.h"
@@ -43,6 +40,7 @@
 #include "Player.h"
 #include "DBGetter.h"
 #include "DatabaseUtils.h"
+#include "Mob.h"
 
 typedef boost::asio::ip::tcp tcp_t;
 
@@ -52,52 +50,52 @@ typedef boost::asio::ip::tcp tcp_t;
 //////////////////////////////////////////////////////////
 // For further information check the boost.asio library
 class CPlayerHandler :
-	public Handler,
-	public boost::enable_shared_from_this<CPlayerHandler>
+	public IHandler,
+	public std::enable_shared_from_this<CPlayerHandler>
 {
-	std::mutex						mutex;
-	std::vector<std::thread*>		asyncThreads;
+	std::vector<boost::thread*>		m_asyncThreads;
 
-	DamageManager					damageManager;
-	SessionsManager&				currentSession;
-	std::shared_ptr<std::thread>	laser_thread;
+	CDamageManager					m_damageManager;
+	CSessionsManager*				m_currentSession;
+	std::thread*					m_laser_thread; // unused atm
 
-	std::atomic<bool>				isAttackThreadRunning;
-	std::atomic<bool>				isRepairThreadRunning;
 
-	LaserType	lasertype;
-	RocketType	rockettype;
+	/* The fact that there is a PNG packet, which gets sent every 20 or so seconds where 
+	youre not sending any other packet means, that you should disconnect a user, when there is 
+	no traffic coming from the user itself after a specific time (a so called timeout)
+	practically it can also come as an auto afk kick tool, which kicks the user every so or so minutes (x PNG packets in a row)
+
+	m_last_ping_time contains the last time in seconds where a user has sent a packet
+	*/
+	std::atomic_llong m_last_ping_time;
+
+	std::atomic<bool>				m_bIsAttackThreadRunning;
+	std::atomic<bool>				m_bIsRepairThreadRunning;
+	bool							m_bLoginSent;
+
+	lasertype_t	m_lasertype;
+	ERocketType	m_rockettype;
 
 	
-	PacketComposer sendpacket;
-
-	FileWriter		write;
+	CPacketComposer m_sendpacket;
 	// Represents the socket
-	tcp_t::socket	socket_;
-	id_t			selectedOpponent;
+	tcp_t::socket	m_socket;
+	id_t			m_selectedOpponent;
 	//text to write
-	std::string		information; //received text
-	char			buf[1024]; // received buffer text
+	std::string		m_information; //received text
+	char			m_buf[2048]; // received buffer text
 
-	boost::asio::streambuf	buffer;
+	boost::asio::streambuf	m_buffer;
 	unsigned short			m_port;
-public:
-	~CPlayerHandler() {
-		for (int i = 0; i < asyncThreads.size();++i) {
-			std::thread* current_thread = asyncThreads.at(i);
-			if (current_thread != nullptr)
-				delete current_thread;
-			else
-				std::cout << "thread may actually be nullptr" << std::endl;
-		}
-		currentSession.leaveSession(shared_from_this());
-		std::cout << "\t!!! -> " << id << " cleared" << std::endl;
-	}
-	CPlayerHandler(CPlayerHandler&&)		= default;
-	CPlayerHandler(const CPlayerHandler&)	= default;
 
-	static std::map<int, SessionsManager> allInSession; //each map has its own session which has its own PlayerHandlers
-	typedef boost::shared_ptr<CPlayerHandler> tcppointer;
+	std::vector<std::string> m_splitpackets;
+public:
+	static std::map<int, CSessionsManager> m_sAllInSession; //each map has its own session which has its own PlayerHandlers
+	~CPlayerHandler();
+	CPlayerHandler(CPlayerHandler&& mov) = default;
+	CPlayerHandler(const CPlayerHandler& cpy)	= default;
+
+	typedef std::shared_ptr<CPlayerHandler> tcppointer;
 
 	// Will be creating the connection
 	static tcppointer createConnection(boost::asio::io_service& io_service, unsigned short port);
@@ -107,28 +105,30 @@ public:
 
 	// Starting to asynchrounously write data
 	void start();
-	void sendPacket(std::string str);
+	void login();
+	bool sendPacket(std::string str);
+	bool sendPackets(std::vector<std::string> strs);
 	void sendPacketAfter(int ms, std::string str);
-	void sendEveryone(std::string packet);
+	static void sendEveryone(std::string packet,map_t map_id);
 
-	void receiveDamagePure(damage_t dmg, id_t from);
-	void receiveDamageHP(damage_t dmg, id_t from);
-	void receiveDamageSHD(damage_t dmg, id_t from);
+	damage_t receiveDamagePure(damage_t dmg);
+	damage_t receiveDamageHP(damage_t dmg);
+	damage_t receiveDamageSHD(damage_t dmg);
 
 	void die();
+	void flushThreads();
 private:
 	// We are going to use the ctor of our socket member
-	CPlayerHandler(boost::asio::io_service& io_service, unsigned short& port, SessionsManager& sm) :
-		socket_(io_service),
-		write("C:/xampp/htdocs/log.txt", m_port),
-		currentSession(sm),
-		Handler()
+	CPlayerHandler(boost::asio::io_service& io_service, unsigned short& port, CSessionsManager* sm) :
+		m_socket(io_service),
+		m_currentSession(sm),
+		IHandler()
 	{
-		m_port = port;	
+		m_port = port;
 	}
 
-	//maybe move this to damagemanager, add this shared pointer too
-	void handleAttack(id_t) noexcept;
+	//maybe add this shared pointer too
+	void handleAttack(id_t) /*noexcept*/;
 	void detonateSMB();
 	void detonateISH();
 	//handling function once we sent something to (a) client(s)
@@ -136,7 +136,10 @@ private:
 
 	//handling function once we received something from a client
 	void handle_read(const boost::system::error_code & ec, size_t bytes);
-
+	void handle_read_b(size_t bytes);
+	void savePosToDB();
+	//sends a packet that serves as a message to the client (that red text when you get EXP/CRED/etc. for example
+	void sendMessagePacket(std::string text);
 	//unused, not working
 	void disconnectUser();
 
@@ -152,8 +155,13 @@ private:
 	//lists of packets that are sent when the user jumps, also setting variables
 	void jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y);
 
-	//update by PlayerInfo
+	//async use; logs out when time is done and no interruption
+	void logoutHandle();
+
+	//update by CPlayerInfo
 	void updateHealth(); //hp,shd
+	void updateShield();
+	void updateHitpoints();
 	void updateAccount(); //cred,uri,jp
 	void updateSpeed(); //spd
 	
@@ -163,6 +171,7 @@ private:
 	void generatePortals();
 	void generateStations();
 	void generatePlayer();
+	void generateAliens();
 	void generatePlayer(id_t id);
 
 	//checks if a gate is in sight to prepare jump stuff
@@ -175,9 +184,17 @@ private:
 	bool isInRangeSquare(int radius, pos_t objx, pos_t objy);
 
 
-	bool packetStartsWith(std::string str);
+	bool packetIs(std::string str);
 
-	bool makeDamage(damage_t dmg, id_t from, handlePtrIt it);
+	bool packetIsLevel(std::string str, size_t level);
+
+	bool makeDamage(damage_t dmg, handlePtr enemy);
+
+	bool makeDamage(damage_t dmg, std::shared_ptr<CMob> enemy);
+
+	damage_t makeSAB(damage_t dmg, handlePtr enemy);
+
+	damage_t makeSAB(damage_t dmg, std::shared_ptr<CMob> mob);
 
 	void handleAttackRequest(const id_t uid);
 
@@ -186,31 +203,16 @@ private:
 
 	//helper member functions to not always create threads in other functions
 	template<class callable, class... arguments>
-	std::thread* async_func(callable&&, arguments&&...);
+	boost::thread* async_func(callable&&, arguments&&...);
 	//helper member functions to not always create threads in other functions
 	template<class callable, class... arguments>
-	std::thread* async_func(int,callable&&, arguments&&...);
+	boost::thread* async_func(int,callable&&, arguments&&...);
 
-	/*simple and strict, maybe i should put that somewhere else
-	std::string getUsername(id_t id = 0);
-	factionid_t getCompany(id_t id = 0);
-	shipid_t getShip(id_t  id = 0);
-	rank_t getRank(id_t id = 0);
-	Position_t getPos(id_t id = 0);
-	map_t getMap(id_t id = 0);
-	health_t getHP(id_t id = 0);
-	health_t getmaxHP(id_t id = 0);
-	shield_t getSHD(id_t id = 0);
-	shield_t getmaxSHD(id_t id = 0);
-	speed_t getSpeed(id_t id = 0);
-
-	level_t getLevel();
-	cargo_t getCargo();
-	exp_t getEXP();
-	hon_t getHON();
-	credits_t getCRD();
-	uri_t getURI();
-	jackpot_t get JP();*/
+#define A
+#ifdef A
+	void DBG_SIMULATE_AI();
+	void DBG_SIMULATE_AI_MOVE();
+#endif
 
 };
 #endif

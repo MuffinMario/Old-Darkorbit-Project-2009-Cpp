@@ -1,5 +1,10 @@
 #include "GameServer.h"
 
+void CGameServer::start()
+{
+	start_accept();
+}
+
 void CGameServer::start_accept()
 {
 	CPlayerHandler::tcppointer newconnection = CPlayerHandler::createConnection(acceptor_.get_io_service(), m_port);
@@ -9,16 +14,14 @@ void CGameServer::start_accept()
 
 void CGameServer::handle_accept(CPlayerHandler::tcppointer newconnection, const boost::system::error_code& err)
 {
+	//TODO: CHECK HERE IF USER IP ALREADY LOGGED IN(?)
 	if (!err) {
-		std::string t = "[" + std::to_string(m_port) + "] Accepted connection " + newconnection->getSocket().remote_endpoint().address().to_string();
+		std::string t = "[" + to_string(m_port) + "] Accepted connection " + newconnection->getSocket().remote_endpoint().address().to_string();
 		
-		std::cout << t << std::endl;
+		dcout << t << cendl;
 
 		newconnection->start();
-
-		std::cout << "ravioli ravioli, give me the reasonoli" << std::endl;
-
-		//accept the next socket
-		start_accept();
 	}
+	//accept the next socket
+	start_accept();
 }

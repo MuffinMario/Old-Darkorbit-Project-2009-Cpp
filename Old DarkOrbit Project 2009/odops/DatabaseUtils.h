@@ -14,12 +14,14 @@
 #include "Defines.h"
 #include "Handler.h"
 #include "DBGetter.h"
+#include "DBUpdater.h"
 
 namespace DBUtil {
 	namespace funcs {
 		username_t		getUsername(id_t id);
 		factionid_t		getCompany(id_t id);
 		shipid_t		getShip(id_t  id);
+		bool			isAdmin(id_t  id);
 		rank_t			getRank(id_t id);
 		Position_t		getPos(id_t id);
 		map_t			getMap(id_t id);
@@ -36,6 +38,33 @@ namespace DBUtil {
 		uri_t			getURI(id_t id);
 		jackpot_t		getJP(id_t id);
 		std::string		getDrones(id_t id);
+		clan_t			getClanTag(id_t clan_id);
+		clanid_t		getUserClanId(id_t id);
+		clan_t			getUserClanTag(id_t id);
+
+		void			setUsername(id_t id, username_t username);
+		void			setCompany(id_t id, factionid_t company);
+		void			setShip(id_t  id,shipid_t shipid);
+		void			setAdmin(id_t  id,bool admin);
+		void			setRank(id_t id,rank_t rank);
+		void			setPos(id_t id,Position_t pos);
+		void			setMap(id_t id,map_t map);
+		void			setHP(id_t id, health_t hp);
+		void			setmaxHP(id_t id, health_t hpm);
+		void			setSHD(id_t id,shield_t shd);
+		void			setmaxSHD(id_t id,shield_t shdm);
+		void			setSpeed(id_t id,speed_t speed);
+		void			setLevel(id_t id,level_t lvl);
+		void			setCargo(id_t id,cargo_t cargo);
+		void			setEXP(id_t id, exp_t exp);
+		void			setHON(id_t id,hon_t hon);
+		void			setCRD(id_t id,credits_t cred);
+		void			setURI(id_t id,uri_t uri);
+		void			setJP(id_t id,jackpot_t jackp);
+		void			setDrones(id_t id,std::string drone_str);
+		void			setUserClanId(id_t id,clanid_t clanid);
+	
+
 	}
 }
 #endif

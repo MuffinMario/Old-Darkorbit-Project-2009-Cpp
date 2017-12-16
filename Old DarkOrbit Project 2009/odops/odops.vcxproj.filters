@@ -55,6 +55,12 @@
     <Filter Include="Headerdateien\Server\Fights">
       <UniqueIdentifier>{0ac9faf6-ad1a-4400-8019-1b81db185f87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Quelldateien\I/O\cmdcolor">
+      <UniqueIdentifier>{51028f23-6075-4d95-b935-9950e46b6784}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\I/O\Color">
+      <UniqueIdentifier>{f40cde82-5acc-4e11-8700-ffb5ae28b2da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Defines.h">
@@ -126,8 +132,23 @@
     <ClInclude Include="Handler.h">
       <Filter>Headerdateien\Server</Filter>
     </ClInclude>
-    <ClInclude Include="AlienHandler.h">
-      <Filter>Headerdateien\Server</Filter>
+    <ClInclude Include="Mob.h">
+      <Filter>Headerdateien\Server\Fights</Filter>
+    </ClInclude>
+    <ClInclude Include="coutcolor.h">
+      <Filter>Headerdateien\I/O\Color</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>Headerdateien\I/O\Color</Filter>
+    </ClInclude>
+    <ClInclude Include="MobWrapper.h">
+      <Filter>Headerdateien\Server\Fights</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="DBUpdater.h">
+      <Filter>Headerdateien\Database</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -173,5 +194,41 @@
     <ClCompile Include="SessionsManager.cpp">
       <Filter>Quelldateien\Server</Filter>
     </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>Quelldateien\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="Defines.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Mob.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="coutcolor.tpp">
+      <Filter>Quelldateien\I/O\cmdcolor</Filter>
+    </ClCompile>
+    <ClCompile Include="Color.cpp">
+      <Filter>Quelldateien\I/O\cmdcolor</Filter>
+    </ClCompile>
+    <ClCompile Include="DBUpdater.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="Defines.tpp">
+      <Filter>Quelldateien</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="C:\xampp\htdocs\favicon.ico">
+      <Filter>Ressourcendateien</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="odops.rc">
+      <Filter>Ressourcendateien</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

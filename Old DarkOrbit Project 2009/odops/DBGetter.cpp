@@ -1,92 +1,140 @@
 #include "DBGetter.h"
+
+#define IP "127.0.0.1"
+#define USER "root"
+#define PASS ""
+#define PORT 3306
+
 /* side notes for me
 	execute("UPDATE `cuentas` SET `empresa` = '3' WHERE `cuentas`.`id` = 12;");
 	table: cuentas row: empresa  at: id 12
 
 */
 
-sql::mysql::MySQL_Driver* DBGetter::driver;
 
+extern "C" {
+	//public MYSQL
+	MYSQL* g_pmysql_connection;
 
-void DBGetter::changeQuery(sql::SQLString column, sql::SQLString table, id_t id) {
-	this->column = column;
-	this->from = table;
-	this->id = id;
-}
-inline void DBGetter::changeColumn(sql::SQLString column) { this->column = column; }
-inline void DBGetter::changeTable(sql::SQLString table) { this->from = table; }
-inline void DBGetter::changeId(id_t id) { this->id = id; }
-
-int DBGetter::getInt() {
-	//creates and executes query and if first() is not returning false(error) returns the integer in the first found row
-	return execute() ? result->getInt(column) : 0;
-}
-long long DBGetter::getInt64() {
-	return execute() ? result->getInt64(column) : 0LL;
-}
-
-unsigned int DBGetter::getUInt() {
-	return execute() ? result->getUInt(column) : 0U;
-}
-unsigned long long DBGetter::getUInt64() {
-	return execute() ? result->getUInt64(column) : 0ULL;
-}
-double DBGetter::getDouble() {
-	return execute() ? result->getDouble(column) : 0.0;
-}
-bool DBGetter::getBoolean() {
-	return execute() ? result->getBoolean(column) : false;
-}
-sql::SQLString DBGetter::getString() {
-	return execute() ? result->getString(column) : sql::SQLString();
-}
-
-bool DBGetter::execute() {
-	try {
-
-		if (con == nullptr) {
-			std::cout << "Connecting to Database..." << std::endl;
-			connect();
+	void CDBGetter::free()
+	{
+		if (g_pmysql_connection != NULL)
+		{
+			mysql_close(g_pmysql_connection);
 		}
-
-		if (con == nullptr) {
-			std::cout << "Could not connect to the database, program will be paused until input!" << std::endl;
-			std::cin.get();
-			return execute();
+		if (result != NULL)
+		{
+			mysql_free_result(result);
 		}
-		command = con->createStatement();
-		result = command->executeQuery("SELECT " + column + " FROM " + from + " WHERE id = " + boost::lexical_cast<std::string>(id) + " ORDER BY id ASC ");
 	}
-	catch (sql::SQLException ex) {
-		std::cerr << "Error executing query in " << __FUNCTION__ << std::endl << "'-> " << ex.what() << std::endl;
-		return false;
+	void CDBGetter::changeQuery(char* column, char* table, char* id_str, id_t id) {
+		this->column = column;
+		this->from = table;
+		this->id_str = id_str;
+		this->id = id;
+	}
+	inline void CDBGetter::changeColumn(char* column) { this->column = column; }
+	inline void CDBGetter::changeTable(char* table) { this->from = table; }
+	inline void CDBGetter::changeIdString(char* id_str) { this->id_str = id_str; }
+	inline void CDBGetter::changeId(id_t id) { this->id = id; }
+
+	int CDBGetter::getInt(void) {
+		return boost::lexical_cast<int>(getString()); //I wish to know why template functions work in a C linked code block
+	}
+	long long CDBGetter::getInt64(void) {
+		return boost::lexical_cast<long long>(getString());
 	}
 
-	if (!result->first()) {
-		std::cerr << "error on reading resultSet->first() " << std::endl;
-		return false;
+	unsigned int CDBGetter::getUInt(void) {
+		return boost::lexical_cast<unsigned int>(getString());
 	}
-	return true;
+	unsigned long long CDBGetter::getUInt64(void) {
+		return boost::lexical_cast<unsigned long long>(getString());
+	}
+	double CDBGetter::getDouble(void) {
+		return boost::lexical_cast<bool>(getString());
+	}
+	bool CDBGetter::getBoolean(void) {
+		return boost::lexical_cast<bool>(getString());
+	}
+	//base
+	char* CDBGetter::getString(void) {
+		if (execute() == false)
+		{
+			return "<ERROR>";
+		}
+		row = mysql_fetch_row(result);
+		return row ? row[0] : "<NULL-ITEM>"; // DBGetter is there to return values of only 1 FIELD, so the first ever result row item is returned, otherwise error
+	}
+
+	void CDBGetter::print_db_err(char* stage)
+	{
+		std::cerr << "[DATABASE ERROR] " << stage << ": " << mysql_error(g_pmysql_connection) << std::endl;
+	}
+
+	bool CDBGetter::execute(void) {
+		const size_t BUFFER_SIZE = 512;//enough buffer size for a query
+		char query_str[BUFFER_SIZE];
+		sprintf_s(query_str, BUFFER_SIZE, "SELECT %s FROM %s WHERE %s = %i ORDER BY %s ASC", column, from, id_str, id, id_str);
+		/* 1. */
+		if (g_pmysql_connection == NULL)
+		{
+			std::cerr << "[DATABASE ERROR] Cannot execute query when there's no connection." << std::endl;
+			return false;
+		}
+		/* 2. */
+		if (mysql_query(g_pmysql_connection, query_str))
+		{
+			print_db_err("@QUERY");
+			mysql_close(g_pmysql_connection);
+			g_pmysql_connection = NULL;
+			return false;
+		}
+		//prevent memory leak on multiple accesses
+		static std::mutex m;
+		m.lock();
+		if (result != NULL) { mysql_free_result(result); result = NULL; }
+		result = mysql_store_result(g_pmysql_connection);
+		m.unlock();
+		
+		if (result == NULL)
+		{
+			print_db_err("@RESULT");
+			mysql_free_result(result); //?
+			mysql_close(g_pmysql_connection);
+			g_pmysql_connection = NULL;
+			result = NULL;
+			return false;
+		}
+		return true;
+	}
+	bool CDBGetter::init(void)
+	{
+		g_pmysql_connection = mysql_init(NULL);
+		return g_pmysql_connection != NULL;
+	}
+	bool CDBGetter::connect(void) {
+		if (g_pmysql_connection == NULL)
+		{
+			if (init() == false)
+			{
+				print_db_err("@INIT");
+				return false;
+			}
+		}
+		if (mysql_real_connect(g_pmysql_connection, IP, USER, PASS, "olddorps", PORT, NULL, 0) == NULL)
+		{
+			print_db_err("@CONNECT");
+			mysql_close(g_pmysql_connection);
+			g_pmysql_connection = NULL;
+			return false;
+		}
+		return true;
+	}
 }
 
-void DBGetter::connect() {
-	try {
-		/* driver is a static objects because in case of multiple DBGetters
-		the program will troubleshoot on the destructor since only one of the objects
-		can get access to the database at once
-		to prevent multiple connecting we will make the program check if there is
-		something allocated already or not.
-		!!!: if DB crashes and restarts, the driver will point to an unused instance
-		*/
-		if (driver == nullptr) {
-			driver = sql::mysql::get_driver_instance();
-		}
-		con = driver->connect("tcp://127.0.0.1:3306", "root", "");
-		if (con == nullptr) throw sql::SQLException("con is nullptr / failed to connect to the database");
-		con->setSchema(database);
-	}
-	catch (sql::SQLException ex) {
-		std::cerr << "Error connecting to the database in " << __FUNCTION__ << std::endl << "'-> " << ex.what() << std::endl;
-	}
-}
 
+#undef IP
+#undef USER
+#undef PASS
+#undef PORT

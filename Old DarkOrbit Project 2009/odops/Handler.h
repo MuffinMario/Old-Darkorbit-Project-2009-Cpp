@@ -2,55 +2,61 @@
 #define HANDLER_H
 #include <memory>
 #include <atomic>
+#include <chrono>
 #include <set>
 #include "Defines.h"
 #include "MovementManager.h"
-#include "Map.h"
 #include "Player.h"
-
-class Handler
+#include "Map.h"
+class IHandler
 {
 	/* TO DO HERE: make atomic variables when going to make the damage calculations (HP/SHD thread-safe)*/
 protected:
-	//IN PLAYER CLASS/OR MAKE ONE NOW U NOOB
-	id_t id{ 0 };
-	PlayerInfo player;
+	id_t m_id{ 0 };
+	std::string m_sessionId{ "" };
+	CPlayerInfo m_player;
 
 
 	//positionmanager
-	std::shared_ptr<MovementManager> mm;
-	Map currentMap;
+	std::shared_ptr<CMovementManager> m_mm;
+	CMap m_currentMap;
 
+	std::atomic_llong m_last_repair_prevention{ 0 };
+	std::atomic_bool m_blogout_cancel{ 0 };
+	std::atomic_llong m_last_logout_time{ 0 };
 public:
 
-	Handler() : currentMap(0), mm(nullptr) {  }
+	IHandler() : m_mm(nullptr) {  }
 
-	virtual ~Handler() { }
+	virtual ~IHandler() { }
 
-	std::atomic<bool>	isAttacking = false;
-	std::atomic<bool>	isInSMBCooldown = false;
-	std::atomic<bool>	hasISH = false;
-	bool				isJumping = false;
+	std::atomic<bool>	m_pbIsAttacking{ false };
+	std::atomic<bool>	m_pbIsInSMBCooldown{false};
+	std::atomic<bool>	m_pbHasISH{ false };
+	bool				m_pbIsJumping{ false };
 
-	id_t		getID()		const { return id; }
-	pos_t		getX()		const { return mm->get_current_position_x(); }
-	pos_t		getY()		const { return mm->get_current_position_y(); }
-	map_t		getMapId()	const { return currentMap.getMapId(); }
-	health_t	getHP()		const { return player.hp; }
-	health_t	getSHD()	const { return player.shd; }
-	health_t	getMaxHP()	const { return player.maxhp; }
-	health_t	getMaxSHD() const { return player.maxshd; }
+	id_t		getID()		const { return m_id; }
+	pos_t		getX()		const { return m_mm->get_current_position_x(); }
+	pos_t		getY()		const { return m_mm->get_current_position_y(); }
+	map_t		getMapId()	const { return m_currentMap.getMapId(); }
+	health_t	getHP()		const { return m_player.hp; }
+	health_t	getSHD()	const { return m_player.shd; }
+	health_t	getMaxHP()	const { return m_player.maxhp; }
+	health_t	getMaxSHD() const { return m_player.maxshd; }
+	void updateRepairPrevent() { m_last_repair_prevention = getTimeNow() ; }
+	void updateLogoutTime() { m_last_logout_time = getTimeNow(); }
+	void toggleLogoutCancel(bool yesorno) { m_blogout_cancel = yesorno; }
 
 
-	virtual void receiveDamagePure(damage_t dmg, id_t from) = 0;
-	virtual void receiveDamageHP(damage_t dmg, id_t from) = 0;
-	virtual void receiveDamageSHD(damage_t dmg, id_t from) = 0;
+	virtual damage_t receiveDamagePure(damage_t dmg) = 0;
+	virtual damage_t receiveDamageHP(damage_t dmg) = 0;
+	virtual damage_t receiveDamageSHD(damage_t dmg) = 0;
 	virtual void die() = 0;
 
-	virtual void sendPacket(std::string str) = 0;
+	virtual bool sendPacket(std::string str) = 0;
 };
 
-typedef boost::shared_ptr<Handler> handlePtr;
-typedef std::set<handlePtr>::iterator handlePtrIt;
+typedef std::shared_ptr<IHandler> handlePtr;
+typedef std::map<std::string,handlePtr>::iterator handlePtrIt;
 
 #endif

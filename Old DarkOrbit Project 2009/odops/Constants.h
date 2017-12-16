@@ -4,6 +4,13 @@
 #include <string>
 
 namespace Constants {
+	namespace Game {
+		constexpr size_t FIGHT_RANGE_PLAYER = 700; //idk
+		constexpr size_t FIGHT_RANGE_NPC = 400; //idk
+		constexpr size_t LOGOUT_TIME = 20;
+		constexpr size_t LOGOUT_TIME_PREMIUM = 5;
+
+	}
 	namespace Database {
 		const std::string USERS		= "cuentas";
 		const std::string CLANS		= "clanes";
@@ -40,13 +47,13 @@ namespace Constants {
 		const std::string ROCKETSHOOT				= "v";
 		const std::string HARVEST					= "HAR";
 		const std::string SPECIAL					= "S";
-		const std::string SPECIAL_MINE				= "S|MIN";
-		const std::string SPECIAL_SMARTBOMB			= "S|SMB";
-		const std::string SPECIAL_INSTASHIELD		= "S|ISH";
-		const std::string SPECIAL_REPBOT			= "S|ROB";
-		const std::string SPECIAL_WIZ				= "S|WIZ";
-		const std::string SPECIAL_JUMPCPU			= "S|J";
-		const std::string SPECIAL_INSTANTREPAIR		= "S|IR";
+		const std::string SPECIAL_MINE				= "MIN";
+		const std::string SPECIAL_SMARTBOMB			= "SMB";
+		const std::string SPECIAL_INSTASHIELD		= "ISH";
+		const std::string SPECIAL_REPBOT			= "ROB";
+		const std::string SPECIAL_WIZ				= "WIZ";
+		const std::string SPECIAL_JUMPCPU			= "J";
+		const std::string SPECIAL_INSTANTREPAIR		= "IR";
 		const std::string TRADEORE_SEND				= "b";
 		const std::string LASERAMMO_CHANGE			= "u";
 		const std::string ROCKETAMMO_CHANGE			= "d";
@@ -61,14 +68,15 @@ namespace Constants {
 		const std::string FARM_ORE					= "w";
 		const std::string MOVE						= "1";
 		const std::string SELECT					= "L";
-		const std::string SETTINGS					= "A|SET";
+		const std::string A							= "A";
+		const std::string A_SETTINGS				= "SET";
 		const std::string HELPWINDOW				= "9|i|0|1";
 		/* TODO: muchshitAS.txt
 					find out what this._parent._parent.cmd  is ( three streampackets)
 					*/
 		const std::string UNVERIFIED_AMMOBUY		= "5";
-		const std::string UNVERIFIED_FIREWORKEXPL	= "S|FWI";
-		const std::string UNVERIFIED_FIREWORKSPAWN	= "S|FWX";
+		const std::string UNVERIFIED_SPECIAL_FIREWORKEXPL	= "S|FWI";
+		const std::string UNVERIFIED_SPECIAL_FIREWORKSPAWN	= "S|FWX";
 	}
 	namespace Send {
 		const std::string W_CROSSDOMAINPOLICY		= "<?xml version=\"1.0\"?><cross-domain-policy xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.adobe.com/xml/schemas/PolicyFileSocket.xsd\"><allow-access-from domain=\"*\" to-ports=\"*\" secure=\"false\" /><site-control permitted-cross-domain-policies=\"master-only\" /></cross-domain-policy>";
@@ -110,11 +118,12 @@ namespace Constants {
 		const std::string SPAWNSTATION				= "s";
 		const std::string UPDATEHP					= "A|HPT";
 		const std::string UPDATESHD					= "A|SHD";
+		const std::string UPDATEHEALTH				= "A|HLT";
 		const std::string RESETROCKETCOOLDOWN		= "A|RCD";
 		const std::string UPDATECURRENCY			= "A|C";
 		const std::string UPDATECARGO				= "A|c";
 		const std::string UPDATEAMMO				= "A|a";
-		const std::string SETTINGS_ITEMS			= "A|ITM";
+		const std::string SETTINGS_ITEMS			= "A|ITM"; // int(droneDpuIndicator),int(diploScan),int(jump_cpu_id(also a boolean)),int(ammoBuyIcon),int(repbotOnBoard),hm7-ore-sell-on-board,,rt_doubbler,smartbombOnBoard,instashieldOnBoard,mine_turbo_level,aim_cpu_level,arol_on_board,cloak_cpu
 		const std::string SETTINGS_SETTINGS			= "A|SET";
 		const std::string COOLDOWN					= "A|CLD";
 		const std::string LEVELUP					= "A|LUP";

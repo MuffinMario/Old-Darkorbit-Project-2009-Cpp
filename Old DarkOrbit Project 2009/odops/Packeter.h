@@ -11,23 +11,23 @@
 //		This class provides a util-like system which automatically adds | between packet lines so you dont need to do it
 //		send/write - only
 //////////////////////////////////////////////////////////
-class Packeter
+class CPacketer
 {
 
-	std::deque<std::string> savedPacket;
+	std::deque<std::string> m_savedPacket;
 
 	std::string getString();
 public:
 	operator std::string() { return getString(); }
-	Packeter(std::string operationHeader);
+	CPacketer(std::string operationHeader);
 
 	template <typename T>
 	T			getValueAt(int i);
 	std::string getStringAt(int i);
 	void		push(std::string cmd);
 	void		push(std::deque<std::string> i);
-	Packeter	pushAndGet(std::string cmd);
-	Packeter	pushAndGet(std::deque<std::string> i);
+	CPacketer	pushAndGet(std::string cmd);
+	CPacketer	pushAndGet(std::deque<std::string> i);
 	void		cleanPacket();
 private: 
 };
