@@ -1,3 +1,4 @@
+//dd-MM-YYYY-hh-mm
 29-07-2016-22-53
 - changed all possible joinable ports to 5152 (from several others, so only ONE SERVER at once. thx heaven')
 - added an if-clause in the "SET" in file DoAction_32 that now finally turns off the music
@@ -36,3 +37,14 @@
 
 03-11-2016-23-40
 - changed move interval from 370 ms to 130 ms (does not seem to affect performance)
+
+03-10-2017-12-44
+- fixed a bug that caused not being able to move after pressing logout button (why did they even do that, maybe they even sent a packet to free the player?; g_farming was set to 1 when button is pressed, but never set back to 0)
+
+09-11-2017-19-00
+- added a packet that updates HP and SHD (0|A|HLT|hp|hpm|shd|shdm) since the client doesnt seem to update both on attack (unnoticeably) close to each other though the packets being sent taking 5 ms max
+
+12-11-2017-17-53
+- Added hotkeys for S|SMB (Numpad 7 + 7) and S|ISH (Numpad 8 + 8)
+- Small debug thing from function _root.nana() i wanted to test what it does and forgot to remove it again, just ignore it (0|SUCC)
+	as far as I have figured out, it just changes the quality setting things
