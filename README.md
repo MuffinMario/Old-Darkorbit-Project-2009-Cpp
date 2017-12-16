@@ -10,7 +10,7 @@ Well as you might have already read the former text, this is a project I did to 
 This is the folder that contains the source of the project. You need two external libraries to run this project.
 
   - boost 1.60 (http://www.boost.org/users/history/version_1_60_0.html)
-  - MySQL C++ Connector 1.1.7 (https://dev.mysql.com/downloads/connector/cpp/)
+  - MySQL C Connector 6.1 (https://dev.mysql.com/downloads/connector/c/)
 
 2. Resource files:
 This is the folder that includes all files that go into the browser of the client, which have been modified + changelog. You need your own CMS. Although there are many folders and files, the only important things I remarkably changed(added) were \, \spacemap_backup and \files
