@@ -35,7 +35,6 @@ For further development you can always take a look at the packet list from manul
 - Position dependent UI changes
 
 ## What to do
-- Fix Disconnect-on-death
 - Fix MovementManager exponentially increasing slowness on the client side (an a-little-bit-more-detailed version of the problems should exist in "MovementManager.h")
 
 ## Thanks to
