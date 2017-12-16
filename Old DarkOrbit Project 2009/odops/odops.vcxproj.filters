@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Quelldateien\Server">
+      <UniqueIdentifier>{9d44aa93-00e1-425a-9245-ef5369faa7f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server">
+      <UniqueIdentifier>{badc11eb-be25-4904-a52a-d73fcf460650}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Utils">
+      <UniqueIdentifier>{0a68f441-88c6-4e59-92e7-4a030c5e1e27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Packet">
+      <UniqueIdentifier>{e4c6beab-d5db-4403-abd1-d57fe87968ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Packet">
+      <UniqueIdentifier>{81070aa9-3deb-41ad-bc66-a057d2f0eea2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Movement">
+      <UniqueIdentifier>{65baddf0-c710-4a01-a5bc-4b025d53b436}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Movement">
+      <UniqueIdentifier>{85cd5635-89ff-4096-a307-a43b94ec07c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Database">
+      <UniqueIdentifier>{1d8b896b-d0e7-47e8-9c87-08fb3d1f1679}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Objects">
+      <UniqueIdentifier>{25f74588-d43c-4bfd-9dbf-3dd7365b0e55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Database">
+      <UniqueIdentifier>{e8214f69-e9c5-4dc3-91dd-d698a4375b0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Fights">
+      <UniqueIdentifier>{fb292d62-cf8c-4d6b-866d-8bc2d747b37f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\I/O">
+      <UniqueIdentifier>{f64eca12-ac4f-45ef-9837-81ed551c7ecf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\I/O">
+      <UniqueIdentifier>{928d3759-a57c-42f2-a193-7dd5ef3db6bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Fights">
+      <UniqueIdentifier>{0ac9faf6-ad1a-4400-8019-1b81db185f87}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Defines.h">
+      <Filter>Headerdateien\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Packeter.h">
+      <Filter>Headerdateien\Server\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>Headerdateien\Server\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketComposer.h">
+      <Filter>Headerdateien\Server\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="UsersDB.h">
+      <Filter>Headerdateien\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="Portal.h">
+      <Filter>Headerdateien\Server\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>Headerdateien\Server\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Station.h">
+      <Filter>Headerdateien\Server\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Headerdateien\Server\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Enums.h">
+      <Filter>Headerdateien\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="DBGetter.h">
+      <Filter>Headerdateien\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="FileWriter.h">
+      <Filter>Headerdateien\I/O</Filter>
+    </ClInclude>
+    <ClInclude Include="FileReader.h">
+      <Filter>Headerdateien\I/O</Filter>
+    </ClInclude>
+    <ClInclude Include="DatabaseUtils.h">
+      <Filter>Headerdateien\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="DamageManager.h">
+      <Filter>Headerdateien\Server\Fights</Filter>
+    </ClInclude>
+    <ClInclude Include="MovementManager.h">
+      <Filter>Headerdateien\Server\Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncThread.h">
+      <Filter>Headerdateien\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionsManager.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServer.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerHandler.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="PolicyHandler.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="PolicyServer.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Handler.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="AlienHandler.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Packeter.cpp">
+      <Filter>Quelldateien\Server\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="PolicyHandler.cpp">
+      <Filter>Quelldateien\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="PolicyServer.cpp">
+      <Filter>Quelldateien\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServer.cpp">
+      <Filter>Quelldateien\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketComposer.cpp">
+      <Filter>Quelldateien\Server\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="DBGetter.cpp">
+      <Filter>Quelldateien\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="FileReader.cpp">
+      <Filter>Quelldateien\I/O</Filter>
+    </ClCompile>
+    <ClCompile Include="FileWriter.cpp">
+      <Filter>Quelldateien\I/O</Filter>
+    </ClCompile>
+    <ClCompile Include="DatabaseUtils.cpp">
+      <Filter>Quelldateien\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="DamageManager.cpp">
+      <Filter>Quelldateien\Server\Fights</Filter>
+    </ClCompile>
+    <ClCompile Include="MovementManager.cpp">
+      <Filter>Quelldateien\Server\Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerHandler.cpp">
+      <Filter>Quelldateien\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionsManager.cpp">
+      <Filter>Quelldateien\Server</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
