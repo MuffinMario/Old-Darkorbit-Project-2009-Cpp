@@ -6,15 +6,19 @@ Well as you might have already read the former text, this is a project I did to 
 
 ## What are the folders?
 
-1. Old DarkOrbit Project 2009:
+1. src:
 This is the folder that contains the source of the project. You need two external libraries to run this project.
 
   - boost 1.60 (http://www.boost.org/users/history/version_1_60_0.html)
-  - MySQL C Connector 6.1 (https://dev.mysql.com/downloads/connector/c/)
+  - MySQL C Connector 6.1 (https://dev.mysql.com/downloads/connector/c/) (VERSIONID 50716)
 
-2. Resource files:
-This is the folder that includes all files that go into the browser of the client, which have been modified + changelog. You need your own CMS. Although there are many folders and files, the only important things I remarkably changed(added) were \, \spacemap_backup and \files
+2. bin_swf:
+This is the folder that includes all files that go into the browser of the client, which have been modified + changelog. 
 
+You need your own CMS. Although there are many folders and files, the only important things I remarkably changed(added) in bin_swf were \, \spacemap_backup and \files
+
+3. database:
+Well... the database. It is derived from manulaiko's old "old darkorbit project" but changed to adapt to more stylistic design choices and more flexibility.
 ## What else do I need?
 You need to import the phpmyadmin mysql file which the server runs on. 
 For further development you can always take a look at the packet list from manulaiko which has been greatly improved by me
@@ -25,7 +29,7 @@ For further development you can always take a look at the packet list from manul
 
 ## Feature list
 - Able to connect to the spacemap.swf by user information through the database
-- Movement Manager to prevent cheaty movement (this is not decently working for the pure reason of the  0|1 packet (movement packet) doing some nonsense calculations, which I might modify once I get the motivation to)
+- Movement Manager to prevent cheaty movement
 - Implemented easy-to-use Packet builder
 - Reads all maps from the database and build the maps accordingly (the whole star system should be accessible)
 - Sounds & Music
@@ -33,14 +37,20 @@ For further development you can always take a look at the packet list from manul
 - Working fighting system 
 - Gate jumping 
 - Position dependent UI changes
+- Working Server-Sided MovementManager (an a-little-bit-more-detailed version of the problems should exist in "MovementManager.h")
+- Semi thread-safe environment
+- Fully functional NPC behaviour, except Cubikon/Protegit and no bosses/ubers!
 
 ## What to do
-- Fix MovementManager exponentially increasing slowness on the client side (an a-little-bit-more-detailed version of the problems should exist in "MovementManager.h")
+- Fix the rest of the thread-unsafe environment (sometimes on player death crash without tracelogs, etc.)
+- Add more NPC behaviour like "Stop following if player too far", "Stop following and wait before gate"(Currently follow you to gate)
+- No attack zones
 
 ## Thanks to
 - Cryz35, because yeah sorta helped me there
 - Heaven' giving me a little bit of knowledge about swf modifying
 - Edox for giving me the sound files
+- turso for fixing the issue of the client movement (the SWF itself was not calculating correctly)
 
 
 (btw i dont know why my two accounts got mixed up uploading these files, don't get confused with TigerOs, that's still me)
