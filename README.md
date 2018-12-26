@@ -46,6 +46,27 @@ For further development you can always take a look at the packet list from manul
 - Add more NPC behaviour like "Stop following if player too far", "Stop following and wait before gate"(Currently follow you to gate)
 - No attack zones
 
+## What needs to be implemented sooner or later (ToDo)
+- Configurations
+- Database revamp (each item having a unique id, type and equipped-on ID)
+- website <-> spacemap "updates"
+- NPC flee on X% HP (15%?)
+- NPC shield regeneration
+- NPC stop interest after not been shot after X seconds (120?)
+- Minor thread safety things (user threadpool)
+- User SESSIONID verification with webserver on spacemap login
+- Finish missing extra items (also update on DB/webpage change)
+- Save settings and handle not yet handled parameters (S| - settings packet / d| - laser selected / r| - rocket select)
+- Cubikon behaviour
+- Update Ammo/Rocket/Extras on shoot/buy/update/use
+- NPC behaviour on gates (distance from gates if not attacked)
+- Radiation zone
+- Fix 4-4 gates
+- Add ore regions X-1 to X-4
+- Finish cargo (max cargo limit, update UI, sell ores on  base)
+- Only show enemies within 10000 units range + selected + enemy on first 2 home maps
+
+
 ## Thanks to
 - Cryz35, because yeah sorta helped me there
 - Heaven' giving me a little bit of knowledge about swf modifying
