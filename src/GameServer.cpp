@@ -7,7 +7,7 @@ void CGameServer::start()
 
 void CGameServer::start_accept()
 {
-	CPlayerHandler::tcppointer newconnection = CPlayerHandler::createConnection(acceptor_.get_io_service(), m_port);
+	CPlayerHandler::tcppointer newconnection = CPlayerHandler::createConnection(io, m_port);
 
 	acceptor_.async_accept(newconnection->getSocket(), boost::bind(&CGameServer::handle_accept, this, newconnection, boost::asio::placeholders::error));
 }

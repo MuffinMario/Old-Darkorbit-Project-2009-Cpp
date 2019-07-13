@@ -67,6 +67,7 @@ void CBonusBox::rewardPlayer(id_t playerid)
 	// If everything thought out right, sql injection is impossible due to no user access input and only numbers
 	std::string sqlSET = "UPDATE cuentas SET ";
 	size_t rewards = 0;
+	double multiplier = 15; // 15x
 	if (m_bb_content.m_ammo.m_ammo_amount != 0)
 	{
 		++rewards;
@@ -97,14 +98,14 @@ void CBonusBox::rewardPlayer(id_t playerid)
 		{
 			sqlSET += ammoType + " = " + ammoType + " + " + to_string(m_bb_content.m_ammo.m_ammo_amount);
 		}
-		player->sendPacket(m_pm.receiveLoot("BAT", { (long long)m_bb_content.m_ammo.m_ammo_type,(long long)m_bb_content.m_ammo.m_ammo_amount }));
+		player->sendPacket(m_pm.receiveLoot("BAT", { (long long)m_bb_content.m_ammo.m_ammo_type,(long long)(m_bb_content.m_ammo.m_ammo_amount*multiplier) }));
 	}
 	if (m_bb_content.m_credits != 0)
 	{
 		if (rewards++ > 0) sqlSET += ", ";
 		sqlSET += "creditos = creditos + " + to_string(m_bb_content.m_credits);
 
-		long long plus = m_bb_content.m_credits;
+		long long plus = m_bb_content.m_credits * multiplier;
 		long long total = player->addCredits(plus);
 
 		player->sendPacket(m_pm.receiveLoot("CRE", { plus,total }));

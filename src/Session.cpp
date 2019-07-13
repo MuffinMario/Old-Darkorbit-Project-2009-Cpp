@@ -7,52 +7,46 @@ std::map<id_t, std::mutex> g_emutex;
 std::map<id_t, std::mutex> g_collmutex;
 CSession::ConnectionContainer_t& CSession::getAllConnections() { return m_connections; }
 
-void CSession::joinSession(handlePtr connection,std::string sessionId)
+void CSession::joinSession(handlePtr connection,id_t userID)
 {
 	/* mutexes are in functions */
-	if (containsSessionId(sessionId))
+	if (containsUserId(userID))
 	{
-		warncout << "[" << m_map.getMapId() << "] [INFO] SessionId " << sessionId << " already online! (replacing...)" << cendl;
-		leaveSession(sessionId);
+		warncout << "[" << m_map.getMapId() << "] [INFO] userID " << userID << " already online! (replacing...)" << cendl;
+		leaveSession(userID);
 	}
 
 	lockConnectionsWrite();
-	m_connections.insert(make_pair(sessionId, connection));
+	m_connections.insert(make_pair(userID, connection));
 	unlockConnectionsWrite();
 
 	dcout << "["  << m_map.getMapId() << "] joined, size: " << m_connections.size() << cendl;
 }
-void CSession::leaveSession(std::string sessionId)
+void CSession::leaveSession(id_t userID)
 {
 	dcout << "[" << m_map.getMapId() << "] before left, size: " << m_connections.size() << cendl;
+	lockConnectionsRead();
 	try {
 		CPacketComposer sp;
-		lockConnectionsRead();
-		id_t id = m_connections.at(sessionId)->getID();
-		m_connections.at(sessionId)->suspendThreads();
-		sendEveryone(sp.removeOpponent(id));
+		m_connections.at(userID)->suspendThreads();
+		sendEveryone(sp.removeOpponent(userID));
 	}
 	catch (std::out_of_range& oor)
 	{
-		warncout << "[" << m_map.getMapId() << "]SessionID " << sessionId << " out of range while leaving session" << cendl;
+		warncout << "[" << m_map.getMapId() << "]userID " << userID << " out of range while leaving session" << cendl;
 	}
 	unlockConnectionsRead();
 	lockConnectionsWrite();
-	m_connections.erase(sessionId);
+	m_connections.erase(userID);
 	unlockConnectionsWrite();
 	dcout << "[" << m_map.getMapId() << "] left, size: " << m_connections.size() << cendl;
 }
 
-bool CSession::containsSessionId(const std::string& sessionId)
+bool CSession::containsUserId(id_t userID)
 {
 	bool found = false;
 	lockConnectionsRead();
-	if (m_connections.size() > 0)
-	{
-		found = std::any_of(m_connections.begin(), m_connections.end(), [&sessionId](const std::pair<std::string, handlePtr>& connection) {
-			return connection.first == sessionId;
-		});
-	}
+	found = m_connections.find(userID) != m_connections.end();
 	unlockConnectionsRead();
 	return found;
 }
@@ -62,7 +56,7 @@ void CSession::addMob(std::shared_ptr<CMob> m)
 	if (m->getId() > m_highestMobId) m_highestMobId = m->getId();
 
 	lockMobsWrite();
-	m_NPCs.push_back(m);
+	m_NPCs[m->getId()] = m;
 	unlockMobsWrite();
 }
 void CSession::addCollectable(std::shared_ptr<ICollectable> c)
@@ -70,13 +64,14 @@ void CSession::addCollectable(std::shared_ptr<ICollectable> c)
 	if (c->getId() > m_highestCollectableId) m_highestCollectableId = c->getId();
 	
 	lockCollectablesWrite();
-	m_collectables.push_back(c);
+	m_collectables[c->getId()] = c;
 	unlockCollectablesWrite();
 }
 CSession::NpcContainer_t::iterator CSession::removeMob(id_t id)
 {
 	lockMobsWrite();
-	for (auto it =m_NPCs.begin(); it != m_NPCs.end();)
+	m_NPCs.erase(id);
+	/*for (auto it =m_NPCs.begin(); it != m_NPCs.end();)
 	{
 		if (it._Ptr) //no i will rethink this later
 		{
@@ -98,15 +93,16 @@ CSession::NpcContainer_t::iterator CSession::removeMob(id_t id)
 				}
 			}
 		}
-	}
+	}*/
 	unlockMobsWrite();
-	return m_NPCs.end();
+	return m_NPCs.end(); //TODO
 }
 
 CSession::Collectables_t::iterator CSession::removeCollectable(id_t id)
 {
 	lockCollectablesWrite();
-	for (auto it = m_collectables.begin(); it != m_collectables.end();)
+	m_collectables.erase(id);
+	/* old and old for (auto it = m_collectables.begin(); it != m_collectables.end();)
 	{
 		if (it._Ptr)
 		{
@@ -128,7 +124,7 @@ CSession::Collectables_t::iterator CSession::removeCollectable(id_t id)
 				}
 			}
 		}
-	}
+	}*/
 	unlockCollectablesWrite();
 	return m_collectables.end();
 }
@@ -156,14 +152,11 @@ CMap CSession::getMap()
 std::shared_ptr<CMob> CSession::getMob(id_t id)
 {
 	lockMobsRead();
-	for (size_t i = 0; i < m_NPCs.size(); i++)
+	NpcContainer_t::iterator found = m_NPCs.find(id);
+	if (found != m_NPCs.end())
 	{
-		if (m_NPCs.at(i)->getId() == id)
-		{
-			auto ptr = m_NPCs.at(i);
-			unlockMobsRead();
-			return ptr;
-		}
+		unlockMobsRead();
+		return (*found).second;
 	}
 	unlockMobsRead();
 	return nullptr;
@@ -172,14 +165,11 @@ std::shared_ptr<CMob> CSession::getMob(id_t id)
 std::shared_ptr<ICollectable> CSession::getCollectable(id_t id)
 {
 	lockCollectablesRead();
-	for (size_t i = 0; i < m_collectables.size(); i++)
+	Collectables_t::iterator found = m_collectables.find(id);
+	if (found != m_collectables.end())
 	{
-		if (m_collectables.at(i)->getId() == id)
-		{
-			auto ptr = m_collectables.at(i);
-			unlockCollectablesRead();
-			return ptr;
-		}
+		unlockCollectablesRead();
+		return (*found).second;
 	}
 	unlockCollectablesRead();
 	return nullptr;
@@ -337,23 +327,16 @@ void CSession::sendEveryone(std::string str)
 	unlockConnectionsRead();
 }
 
-void CSession::sendEveryoneBut(std::string str, const std::string& sessionID)
-{
-	lockConnectionsRead();
-	if (m_connections.size() < 1) return;
-	for (auto& it : m_connections) {
-		if (it.first != sessionID)
-			it.second->sendPacket(str);
-	}
-	unlockConnectionsRead();
-}
-
 void CSession::sendEveryoneBut(std::string str, id_t userID)
 {
 	lockConnectionsRead();
-	if (m_connections.size() < 1) return;
+	if (m_connections.size() < 1)
+	{	
+		unlockConnectionsRead();
+		return;
+	}
 	for (auto& it : m_connections) {
-		if(it.second->getID() != userID)
+		if(it.first != userID)
 			it.second->sendPacket(str);
 	}
 	unlockConnectionsRead();
@@ -362,7 +345,11 @@ void CSession::sendEveryoneBut(std::string str, id_t userID)
 void CSession::sendEveryoneBut(std::string str, std::function<bool(handlePtr)>& det)
 {
 	lockConnectionsRead();
-	if (m_connections.size() < 1) return;
+	if (m_connections.size() < 1)
+	{
+		unlockConnectionsRead();
+		return;
+	}
 	for (auto& it : m_connections) {
 		if (it.second && det(it.second))
 			it.second->sendPacket(str);
@@ -370,41 +357,31 @@ void CSession::sendEveryoneBut(std::string str, std::function<bool(handlePtr)>& 
 	unlockConnectionsRead();
 }
 
-void CSession::sendTo(std::string str, std::string sessionId) {
-	//in case of tight race condition
-	if(containsSessionId(sessionId))
-		m_connections[sessionId]->sendPacket(str);
-}
-
 void CSession::sendTo(std::string str, id_t userID)
 {
 	lockConnectionsRead();
 
-	handlePtrIt connection = std::find_if(m_connections.begin(), m_connections.end(), [&userID](const std::pair<std::string, handlePtr>& con) {
-		return con.second->getID() == userID;
-	});
+	handlePtr connection = m_connections[userID];
 
-	if (connection != m_connections.end())
+	if (connection != nullptr)
 	{
-		connection->second->sendPacket(str);
+		connection->sendPacket(str);
 	}
 	unlockConnectionsRead();
 }
 
 //returns the shared_ptr to the first result of this id
 const handlePtr CSession::getHandler(id_t id) {
-	handlePtr handle = nullptr;
 	lockConnectionsRead();
-	handlePtrIt connection = std::find_if(m_connections.begin(), m_connections.end(), [&id](const std::pair<std::string, handlePtr>& con) {
-		return con.second->getID() == id;
-	});
-	if (connection != m_connections.end())
+	ConnectionContainer_t::iterator found = m_connections.find(id);
+	if (found != m_connections.end())
 	{
-		handle = connection->second;
+		unlockConnectionsRead();
+		return (*found).second;
 	}
 	/*on other threads: ref counts of this handle could be 0, but due to ^ its always >0 since we 
 	 * prohibited the elimination of the container element with this
 	 */
 	unlockConnectionsRead();
-	return handle;
+	return nullptr;
 }

@@ -46,8 +46,9 @@ void CSessionsManager::fastTick()
 		/* Reference instead of copy because the npccontainer contains a shared ptr and
 			cannot be deleted since the mutex stops it from deleting until loop is over
 		*/
-		for (auto& mp : session.getMobs()) 
+		for (auto& mobs : session.getMobs()) 
 		{
+			std::shared_ptr<CMob> mp = mobs.second;
 			if (mp != nullptr)
 			{
 				//if alien wants to make another move (when the time has come)
@@ -74,7 +75,6 @@ void CSessionsManager::fastTick()
 									mp->setRealWaitingTime(0); // so it instantly flies towards enemy
 									triggeredId = player->getID();
 									break;
-									//dcout << "[Map " << map << "] " << mp->getId() << " TRIGGERED REEEEEEEEEEEEEEEEEEEEEEEE (" << player->getID() << ")" << cendl; //yeah im about 12 years old im commenting this from the future ( 1 week later ) 
 								}
 							}
 						}
@@ -217,7 +217,7 @@ void CSessionsManager::secondTick()
 		session.lockConnectionsRead();
 		for (auto player_pair : session.getAllConnections())
 		{
-			handlePtr player = player_pair.second; //copy shared ptr for ref count
+			handlePtr& player = player_pair.second; //copy shared ptr for ref count
 			if (player)
 			{
 				DBUtil::funcs::setPos(player->getID(), player->getPos());
@@ -258,7 +258,7 @@ void CSessionsManager::secondTick()
 		session.lockCollectablesRead();
 		for (auto it = session.getCollectables().begin(); it != session.getCollectables().end();)
 		{
-			std::shared_ptr<ICollectable> collectable = *it;
+			std::shared_ptr<ICollectable>& collectable = (*it).second;
 			if (collectable && (collectable->getType() == CResourceBox::RESOURCE_BOX_DEFAULT_COLLECTABLE_ID ||
 				collectable->getType() == CResourceBox::RESOURCE_BOX_PRIVATE_COLLECTABLE_ID))
 			{
@@ -293,9 +293,10 @@ void CSessionsManager::secondTick()
 
 
 		session.lockMobsRead();
-		//this segment will NOT insert delete the vector
-		for (auto mp : session.getMobs())
+		//this segment will NOT insert delete the container
+		for (auto mobp : session.getMobs())
 		{
+			std::shared_ptr<CMob>& mp = mobp.second;
 			if (mp->getFocusedPlayer() > 0 && mp->getFocusedPlayer() < BEGIN_MOB_IDS &&
 				mp->attacking())
 			{

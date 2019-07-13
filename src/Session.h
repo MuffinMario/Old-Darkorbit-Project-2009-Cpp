@@ -2,7 +2,8 @@
 #define SINGLE_SESSION_H
 #include <boost\shared_ptr.hpp>
 #include <boost\bind.hpp>
-#include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <functional>
 #include <Windows.h>
@@ -19,10 +20,10 @@ class CSession
 public:
 	/* Typedefs */
 
-	typedef std::map<std::string, handlePtr> ConnectionContainer_t;
-	typedef std::vector<std::shared_ptr<CMob>> NpcContainer_t;
-	typedef std::vector<std::shared_ptr<ICollectable>> Collectables_t;
-	typedef std::unique_ptr<std::shared_mutex> mutex_t;
+	typedef std::unordered_map<id_t,handlePtr> ConnectionContainer_t; // identifiable by sesID / TODO: maybe id_t instead?
+	typedef std::unordered_map<id_t,std::shared_ptr<CMob>> NpcContainer_t; //identifiable by id 
+	typedef std::unordered_map<id_t,std::shared_ptr<ICollectable>> Collectables_t;//identifiable by id 
+	typedef std::unique_ptr<std::shared_mutex> mutex_t; // TODO: Perhaps a bit more elegant 
 private:
 	mutex_t m_connectionMutex;
 	mutex_t m_npcMutex;
@@ -35,8 +36,8 @@ private:
 
 	id_t m_highestMobId = 0LL;
 	id_t m_highestCollectableId = 0LL;
-	//returns true if a client (session id) is already connected to the server
-	bool				containsSessionId(const std::string& sessionId);
+	//returns true if a client (user id) is already connected to the server
+	bool				containsUserId(id_t sessionId);
 public:
 	explicit CSession(map_t mapid) :m_map(mapid),
 		m_connectionMutex(new std::shared_mutex),
@@ -79,14 +80,13 @@ public:
 	/* Session Connection Functions */
 
 	//makes a client join the session
-	void				joinSession(const handlePtr connection,std::string sessionId);
+	void				joinSession(const handlePtr connection,id_t sessionId);
 	//makes a client leave the session
-	void				leaveSession(std::string sessionId);
+	void				leaveSession(id_t sessionId);
 
 
 	/* Session Connection Socket Functions */
 	void				sendEveryone(std::string str) ;
-	void				sendEveryoneBut(std::string str, const std::string& sessionID);
 	void				sendEveryoneBut(std::string str, id_t userID);
 	/* Relatively more complex function which includes a function that lets the user implement a delimiter 
 		example sendEveryoneBut("0|A|STD|Hello User",[](handlePtr ptr) { return ptr->getID() < 20;)
@@ -96,7 +96,7 @@ public:
 	void				sendEveryoneBut(std::string str, std::function<bool(handlePtr)>& det);
 
 	//sends a string-packet to a userID
-	void				sendTo(std::string str, std::string sessionId);
+	[[deprecated]] void				sendTo(std::string str, std::string sessionId);
 	void				sendTo(std::string str, id_t userID);
 
 

@@ -304,7 +304,7 @@ void CPlayerHandler::disconnectUser() {
 	if(m_currentSession)
 		sendEveryone(m_sendpacket.removeOpponent(m_id));
 	if(m_currentSession)
-		m_currentSession->leaveSession(m_sessionId);
+		m_currentSession->leaveSession(m_id);
 	m_socket.close();	
 }
 
@@ -583,8 +583,10 @@ map_t CPlayerHandler::getUserIDisOnMap(id_t id) {
 	m_currentSession->lockConnectionsRead();
 	for (auto& conns : m_currentSession->getAllConnections()) {
 		if (conns.second->getID() == id)
+		{ /// well well well look who forgot the brackets
 			m_currentSession->unlockConnectionsRead();
 			return conns.second->getMapId();
+		}
 	}
 	m_currentSession->unlockConnectionsRead();
 	return 0;
@@ -665,7 +667,7 @@ void CPlayerHandler::logInPackets() {
 		std::string map_m = m_sendpacket.loadMiniMap(m_player.mapid);
 		//dcout << "size: " << m_sAllInSession.size() << " - found sID in map " << m_player.mapid << ": " << m_sAllInSession[m_player.mapid].containsSessionId(m_sessionId) << cendl;
 		try {
-			g_sessionsManager.joinSession(shared_from_this(),m_sessionId,m_player.mapid);
+			g_sessionsManager.joinSession(shared_from_this(),m_id,m_player.mapid);
 			m_currentSession = &g_sessionsManager.getAnySession(m_player.mapid);
 		}
 		catch (...)
@@ -765,8 +767,8 @@ void CPlayerHandler::jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y) {
 		dcout << "Jumping - session" << cendl;
 		try {
 			//m_sAllInSession[m_currentMap.getMapId()].leaveSession(m_sessionId);
-			m_currentSession->leaveSession(m_sessionId);
-			g_sessionsManager.joinSession(shared_from_this(), m_sessionId, m_player.mapid);
+			m_currentSession->leaveSession(m_id);
+			g_sessionsManager.joinSession(shared_from_this(), m_id, m_player.mapid);
 			m_currentSession = &g_sessionsManager.getAnySession(m_player.mapid);
 			/*
 		m_sAllInSession[wantedMapID].joinSession(shared_from_this(), m_sessionId);
@@ -785,7 +787,7 @@ void CPlayerHandler::jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y) {
 		sendPacket("0|B|2|3|4|7|8");
 		sendPacket("0|3|1|2|3");
 		sendPacket("0|8");
-
+		sendPacket("0|A|RCD"); // rocket cooldown reset due to jump interrupt
 		//also sets m_currentMap
 		dcout << "Jumping - generating" << cendl;
 		generateObjects(wantedMapID);
@@ -914,7 +916,7 @@ void CPlayerHandler::generatePlayer() {
 	// dont catch mysql_exception, this function gets called in a try-catch environment
 	m_currentSession->lockConnectionsRead();
 	for (auto& it : m_currentSession->getAllConnections()) {
-		if (it.first != m_sessionId)
+		if (it.first != m_id)
 		{
 			id_t uid = it.second->getID();
 			shipid_t shipID = DBUtil::funcs::getShip(uid);
@@ -949,9 +951,9 @@ void CPlayerHandler::generateAliens() {
 	m_currentSession->lockMobsRead();
 	for(auto mob: m_currentSession->getMobs())
 	{
-		if (mob != nullptr)
+		if (mob.second != nullptr)
 		{
-			mob->spawn(m_id);
+			mob.second->spawn(m_id);
 		}
 	}
 	m_currentSession->unlockMobsRead();
@@ -962,9 +964,9 @@ void CPlayerHandler::generateCollectables()
 	m_currentSession->lockCollectablesRead();
 	for (auto coll : m_currentSession->getCollectables())
 	{
-		if (coll != nullptr)
+		if (coll.second != nullptr) //TODO: test if actually neccesary, on all generate functions
 		{
-			coll->spawn(m_id);
+			coll.second->spawn(m_id);
 		}
 	}
 	m_currentSession->unlockCollectablesRead();
@@ -1783,17 +1785,18 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 #ifdef A
 					else if (packetIs("DBG_AI_BOOM"))
 					{
-						std::vector<std::shared_ptr<CMob>> allNpcs = m_currentSession->getMobs();
-						for(auto mob : allNpcs)
+						CSession::NpcContainer_t allNpcs = m_currentSession->getMobs();
+						std::vector<std::shared_ptr<CMob>> mobs;
+						for (auto mob : allNpcs)
 						{
-							if(mob)
-							{ 
-								mob->die();
-							}
-							else
+							if (mob.second)
 							{
-								//dcout << "mob in iteration is nullptr" << cendl;
+								mobs.push_back(mob.second);
 							}
+						}
+						for (auto mob : mobs)
+						{
+							mob->die();
 						}
 					}
 					else if (packetIs("DBG_UPDATE_MY_SPEED"))
@@ -1803,8 +1806,10 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					}
 					else if (packetIs("DBG_AI_FIRE"))
 					{
-						for(auto mob : m_currentSession->getMobs())
-						{
+						m_currentSession->lockMobsRead();
+						for(auto mobpair : m_currentSession->getMobs())
+						{	
+							std::shared_ptr<CMob>& mob = mobpair.second;
 							if (mob)
 							{
 								id_t id = m_id;
@@ -1819,6 +1824,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 								mob->abort();
 							}
 						}
+						m_currentSession->unlockMobsRead();
 					}
 					else if (packetIs("DBG_HESOYAM"))
 					{
@@ -1838,8 +1844,9 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					{
 						const int distance = 250;
 
-						for(auto mob : m_currentSession->getMobs())
+						for(auto mobpair : m_currentSession->getMobs())
 						{
+							std::shared_ptr<CMob>& mob = mobpair.second;
 							if (mob)
 							{
 								unsigned int degree = random<uint32_t>(360);
@@ -1993,8 +2000,7 @@ damage_t CPlayerHandler::receiveDamageSHD(damage_t dmg) {
 
 void CPlayerHandler::die()
 {
-	
-	try {
+ 	try {
 		sendEveryone(m_sendpacket.kill(m_id));
 		map_t respawnMap = 1;
 		switch (m_player.fractionid)

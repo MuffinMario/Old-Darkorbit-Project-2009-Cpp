@@ -21,7 +21,7 @@ void COre::rewardPlayer(id_t playerid)
 			query
 		);
 	}
-	catch (mysql_exception& me)
+	catch(const mysql_exception& me)
 	{
 		warncout << "User " << playerid << " mysql_exception @COre::rewardPlayer : " << me.what() << cendl;
 		user->disconnectUser();
@@ -40,7 +40,7 @@ void COre::spawn(id_t to)
 	if (player)
 	{
 		std::string createString = m_pm.createOre(m_id, m_oretype, m_pos.first, m_pos.second);
-		player->sendPacket(createString);
+		player->sendPacket(createString.c_str());
 	}
 }
 
