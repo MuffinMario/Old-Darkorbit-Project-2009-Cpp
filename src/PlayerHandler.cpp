@@ -1003,27 +1003,24 @@ void CPlayerHandler::generatePlayer(id_t id) {
 }
 void CPlayerHandler::checkForObjectsToInteract() {
 	
-	bool closeToGate = false;
-	bool closeToStation = false;
-	bool inRadiationzone = false;
 
 	//for the sake of multiple read/writes these two for each loops have to create temporary new "Portals/Stations" instead of iterating through them.
 	auto portals = m_currentMap.getPortals();
 	auto stations = m_currentMap.getStations();
 
-	closeToGate = std::any_of(portals.begin(), portals.end(), [&](const CPortal& p) {
+	m_bCloseToGate = std::any_of(portals.begin(), portals.end(), [&](const CPortal& p) {
 		return isInRangeCircle(CPortal::RANGE, p.x, p.y);
 	});
-	closeToStation = std::any_of(stations.begin(), stations.end(), [&](const CStation& s) {
+	m_bCloseToStation = std::any_of(stations.begin(), stations.end(), [&](const CStation& s) {
 		return isInRangeSquare(CPortal::RANGE, s.x, s.y);
 	});
 
 	auto pos = m_mm->get_current_position();
-	inRadiationzone = pos.first > m_currentMap.getWidth() || pos.first < 0 ||
+	m_bInRadiationzone = pos.first > m_currentMap.getWidth() || pos.first < 0 ||
 		pos.second > m_currentMap.getHeight() || pos.second < 0;
 	//TO-DO add other check, etc.
 
-	std::string packet = m_sendpacket.events(closeToGate && this->getShieldPreventTime() ? 1 : closeToStation ? 1: 0, m_bIsRepairing, closeToStation, inRadiationzone, closeToGate, 0);
+	std::string packet = m_sendpacket.events(m_bCloseToGate && this->getShieldPreventTime() ? 1 : m_bCloseToStation ? 1: 0, m_bIsRepairing, m_bCloseToStation, m_bInRadiationzone, m_bCloseToGate, 0);
 	sendPacket(packet);
 }
 bool CPlayerHandler::isInRangeCircle(int radius, pos_t objx, pos_t objy) {
@@ -1544,7 +1541,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						m_socket.close();
 					}
 					else if (packetIs("DBG_YEAHBOXES")) {
-						for (int i = 0; i < 20000; i++)
+						for (int i = 0; i < 2000; i++)
 						{
 							m_currentSession->addCollectable(CBonusBox::generateNewBonusBox(m_currentSession->generateNewCollectableId(), m_currentSession->getMapId(), *m_currentSession));
 						}
@@ -1965,7 +1962,7 @@ damage_t CPlayerHandler::receiveDamageHP(damage_t dmg) {
 	if (hp <= 0) {
 		realdmg += hp; // 5000 DMG 4000 HP -> -1000 thus 5000 + (-1000) = 4000
 		m_player.hp = 0;
-		die();
+		return -dmg;
 	}
 	else
 	{
@@ -2023,7 +2020,6 @@ void CPlayerHandler::die()
 		}
 		//sendEveryone(m_sendpacket.removeOpponent(m_id),m_currentMap.getMapId());
 		disconnectUser();
-
 	}
 	catch (boost::exception_ptr& e) {
 		std::cerr << BOOST_CERR_OUTPUT(e) << std::endl;

@@ -307,7 +307,6 @@ void CMob::dropResources()
 {
 	std::shared_ptr<CResourceBox> resource = std::make_shared<CResourceBox>(m_loot, m_session.get().generateNewCollectableId(), m_mm.get_current_position_x(), m_mm.get_current_position_y(), m_session, m_belongToId);
 	m_session.get().addCollectable(resource);
-	resource->spawn();
 }
 CSession::NpcContainer_t::iterator CMob::die()
 {

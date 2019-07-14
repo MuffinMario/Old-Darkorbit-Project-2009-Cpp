@@ -67,7 +67,7 @@ void CBonusBox::rewardPlayer(id_t playerid)
 	// If everything thought out right, sql injection is impossible due to no user access input and only numbers
 	std::string sqlSET = "UPDATE cuentas SET ";
 	size_t rewards = 0;
-	double multiplier = 15; // 15x
+	double multiplier = 2; // TODO: ???->getGlobalMultiplier() + player->getBBMultiplier()  instead of a number
 	if (m_bb_content.m_ammo.m_ammo_amount != 0)
 	{
 		++rewards;
@@ -94,18 +94,19 @@ void CBonusBox::rewardPlayer(id_t playerid)
 			ammoType = "LCB10";
 		}
 		//TODO: player->addAmmo(ammoType, m_bb_content.m_ammo.m_ammo_amount);
+		ammo_t amount = m_bb_content.m_ammo.m_ammo_amount * multiplier;
 		if (ammoType != "")
 		{
-			sqlSET += ammoType + " = " + ammoType + " + " + to_string(m_bb_content.m_ammo.m_ammo_amount);
+			sqlSET += ammoType + " = " + ammoType + " + " + to_string(amount);
 		}
-		player->sendPacket(m_pm.receiveLoot("BAT", { (long long)m_bb_content.m_ammo.m_ammo_type,(long long)(m_bb_content.m_ammo.m_ammo_amount*multiplier) }));
+		player->sendPacket(m_pm.receiveLoot("BAT", { (long long)m_bb_content.m_ammo.m_ammo_type,(long long)(amount) }));
 	}
 	if (m_bb_content.m_credits != 0)
 	{
 		if (rewards++ > 0) sqlSET += ", ";
-		sqlSET += "creditos = creditos + " + to_string(m_bb_content.m_credits);
-
 		long long plus = m_bb_content.m_credits * multiplier;
+		sqlSET += "creditos = creditos + " + to_string(plus);
+
 		long long total = player->addCredits(plus);
 
 		player->sendPacket(m_pm.receiveLoot("CRE", { plus,total }));
@@ -113,9 +114,9 @@ void CBonusBox::rewardPlayer(id_t playerid)
 	if (m_bb_content.m_uridium != 0)
 	{
 		if (rewards++ > 0) sqlSET += ", ";
-		sqlSET += "uridium = uridium + " + to_string(m_bb_content.m_uridium);
+		long long plus = m_bb_content.m_uridium * multiplier;
+		sqlSET += "uridium = uridium + " + to_string(plus);
 
-		long long plus = m_bb_content.m_uridium;
 		long long total = player->addUri(plus);
 
 		player->sendPacket(m_pm.receiveLoot("URI", { plus,total }));
@@ -123,9 +124,9 @@ void CBonusBox::rewardPlayer(id_t playerid)
 	if (m_bb_content.m_jackpot != 0.0f)
 	{
 		if (rewards++ > 0) sqlSET += ", ";
-		sqlSET += "jackpot = jackpot + " + to_string(m_bb_content.m_jackpot);
+		float plus = m_bb_content.m_jackpot *multiplier;
+		sqlSET += "jackpot = jackpot + " + to_string(plus);
 
-		float plus = m_bb_content.m_jackpot;
 		float total = player->addJP(plus);
 
 		player->sendPacket(m_pm.receiveLoot("JPE", { plus,total }));
@@ -133,15 +134,16 @@ void CBonusBox::rewardPlayer(id_t playerid)
 	if (m_bb_content.m_extraenergy != 0)
 	{
 		if(rewards++ > 0) sqlSET += ", ";
-		sqlSET += "energia_extra = energia_extra + " + to_string(m_bb_content.m_extraenergy);
-		for(extraenergy_t i = 0; i < m_bb_content.m_extraenergy ;i++)
-			player->sendPacket(m_pm.receiveLoot("XEN"));
+		extraenergy_t energy = m_bb_content.m_extraenergy * multiplier;
+		sqlSET += "energia_extra = energia_extra + " + to_string(energy);
+		for(extraenergy_t i = 0; i < energy;i++)
+			player->sendPacket(m_pm.receiveLoot("XEN")); //its not XENomit, but XtraENergy
 	}
 	if (rewards > 0)
 	{
 		handlePtr user = m_session.get().getHandler(playerid);
 		try {
-			sqlSET += " WHERE id = " + to_string(playerid);
+			sqlSET += " WHERE id = " + to_string(playerid); // well it does look like there is no way to sql inject here, RIGHT?
 			g_database_update.queryUpdateRaw(
 				sqlSET
 			);

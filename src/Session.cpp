@@ -66,6 +66,7 @@ void CSession::addCollectable(std::shared_ptr<ICollectable> c)
 	lockCollectablesWrite();
 	m_collectables[c->getId()] = c;
 	unlockCollectablesWrite();
+	c->spawn();
 }
 CSession::NpcContainer_t::iterator CSession::removeMob(id_t id)
 {

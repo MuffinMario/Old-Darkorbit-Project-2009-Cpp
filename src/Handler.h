@@ -41,6 +41,10 @@ protected:
 	std::atomic_bool m_blogout_cancel{ 0 };
 	std::atomic_llong m_last_logout_time{ 0 };
 	std::atomic<bool>	m_bIsRepairing = false;
+	std::atomic<bool>	m_bCloseToGate = false;
+	std::atomic<bool>	m_bCloseToStation = false;
+	std::atomic<bool>	m_bInRadiationzone = false;
+	int					m_secondsInRadiationzone = 0; // written only by secondTick
 public:
 
 	IHandler() : m_mm(nullptr), m_player{}, m_ammo{} {  }
@@ -56,6 +60,18 @@ public:
 
 	bool		isRepairing() const { return m_bIsRepairing; }
 	void		setRepairing(bool rep) { m_bIsRepairing = rep; }
+
+	bool		isCloseToGate() const { return m_bCloseToGate; }
+	void		setCloseToGate(bool closetogate) { m_bCloseToGate = closetogate; }
+
+	bool		isCloseToStation() const { return m_bCloseToStation; }
+	void		setCloseToStation(bool closetostation) { m_bCloseToStation = closetostation; }
+
+	bool		isInRadiationzone() const { return m_bInRadiationzone; }
+	void		setInRadiationzone(bool inradiation) { m_bInRadiationzone = inradiation; }
+
+	int			getSecondsInRadiationzone() { return m_secondsInRadiationzone; }
+	void		setSecondsInRadiationzone(int to) { m_secondsInRadiationzone = to; }
 
 	id_t		getID()		const { return m_id; }
 	pos_t		getX()		const { return m_mm->get_current_position_x(); }

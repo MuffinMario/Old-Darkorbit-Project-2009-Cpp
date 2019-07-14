@@ -85,6 +85,7 @@ namespace {
 				session.addMob(mob);
 
 				//remember: do not add mob->spawn since the server is not even accepting sockets at this point
+				// ^ response to this: doesnt play a role tbh
 			}
 		}
 

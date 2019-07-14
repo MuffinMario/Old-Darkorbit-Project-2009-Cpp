@@ -189,6 +189,7 @@ void CSessionsManager::secondTick()
 	std::vector<CSession>::iterator permSessionIt = m_permSessions.begin();
 	std::vector<CSession>::iterator tempSessionIt = m_tempSessions.begin();
 
+	std::vector<handlePtr> goingToDiePlayers; // this hurts
 	for(;;)
 	{
 		std::vector<CSession>::iterator sessionIt;
@@ -221,7 +222,30 @@ void CSessionsManager::secondTick()
 			if (player)
 			{
 				DBUtil::funcs::setPos(player->getID(), player->getPos());
+				//radiation zone check
+				bool isInRad = player->isInRadiationzone();
+				int secondsInRad = player->getSecondsInRadiationzone();
+				if (isInRad || secondsInRad) // we need to refresh it back to 0 if player is outside
+				{
+					if (!isInRad)
+						secondsInRad = 0;
+					else
+					{
+						player->setSecondsInRadiationzone(++secondsInRad);
+						// d(t) = maxhp*0.01 + t^2*maxhp*0.01
+						// 1% of hp + time squared * 1% of hp
+						damage_t dmg = player->getMaxHP() * 0.01 + secondsInRad * secondsInRad * player->getMaxHP() * 0.01;
 
+						bool dead = player->receiveDamageHP(dmg) < 0;
+						// i am unhappy with this solution
+						if (dead)
+						{
+							goingToDiePlayers.push_back(player);
+							continue; // dead, we dont care
+						}
+						
+					}
+				}
 				if (timeHasPassed(player->getShieldPreventTime(),5000))
 				{
 					//* Handle Shield regen* /
@@ -253,6 +277,18 @@ void CSessionsManager::secondTick()
 			}
 		}
 		session.unlockConnectionsRead();
+		//I did put effort that deleting a player twice cannot occur, but you know there will be cases, so the worst case that should have been taken care of by CSession should be:
+		// 1. Player dies by radiation zone
+		// 2. before the program reaches this for loop somebody kills the player in an attacker thread
+		// 3. the player is removed from connectionTable ( shared_ptr from goingToDiePlayers keeps player data "alive", but hes removed from the table nontheless)
+		// 4. the player will not get removed again in this for loop (?????)
+		// TODO: TEST THIS BY BREAKPOINTING ON ABOVE session.unlockConnectionsRead(); 
+		for (auto& players : goingToDiePlayers)
+		{
+			players->die();
+		}
+		goingToDiePlayers.clear();
+
 
 		/* Collectable tick includes delete operation */
 		session.lockCollectablesRead();
