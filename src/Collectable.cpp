@@ -14,7 +14,7 @@ bool ICollectable::verifyUserPosition(handlePtr player)
 			std::abs(offsetY - solidOffsetY) < 10);
 }
 
-std::vector<std::shared_ptr<ICollectable>>::iterator ICollectable::remove()
+CSession::Collectables_t::iterator ICollectable::remove()
 {
 	m_session.get().sendEveryone(m_pm.removeLoot(m_id));
 	return m_session.get().removeCollectable(m_id);

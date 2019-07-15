@@ -26,6 +26,9 @@ public:
 	const static size_t		MAPSIZE_NORMAL_Y = 14100;
 	const static size_t		MAPSIZE_BIG_X	 = 42000;
 	const static size_t		MAPSIZE_BIG_Y	 = 28200;
+	const static size_t		RADIATIONZONE_DISTANCE_WEAK = 0;
+	const static size_t		RADIATIONZONE_DISTANCE_MEDIUM = 2500;
+	const static size_t		RADIATIONZONE_DISTANCE_STRONG = 7000;
 	explicit CMap()
 	{
 		mapID = 0;

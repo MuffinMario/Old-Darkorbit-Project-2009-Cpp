@@ -12,11 +12,12 @@
 typedef boost::asio::ip::tcp tcp_t;
 class CPolicyServer
 {
+	boost::asio::io_context& io;
 	tcp_t::acceptor m_acceptor;
 	unsigned short	m_port;
 public:
 	/* default constructor: normal i/o service and a port where the server is running on */
-	CPolicyServer(boost::asio::io_service& io_service, unsigned short& port) : m_acceptor(io_service,tcp_t::endpoint(tcp_t::v4(), port)) {
+	CPolicyServer(boost::asio::io_service& io_service, unsigned short& port) : io(io_service),m_acceptor(io_service,tcp_t::endpoint(tcp_t::v4(), port)) {
 		m_port = port;
 		start_accept();
 	}

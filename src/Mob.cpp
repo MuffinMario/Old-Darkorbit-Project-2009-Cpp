@@ -307,16 +307,15 @@ void CMob::dropResources()
 {
 	std::shared_ptr<CResourceBox> resource = std::make_shared<CResourceBox>(m_loot, m_session.get().generateNewCollectableId(), m_mm.get_current_position_x(), m_mm.get_current_position_y(), m_session, m_belongToId);
 	m_session.get().addCollectable(resource);
-	resource->spawn();
 }
-void CMob::die()
+CSession::NpcContainer_t::iterator CMob::die()
 {
 	std::lock_guard<std::mutex> l(m_mob_mutex);
 	m_session.get().sendEveryone(m_pm.kill(m_id));
 	m_session.get().sendEveryone(m_pm.removeOpponent(m_id));
 	rewardLoot();
 	dropResources();
-	m_session.get().removeMob(m_id);
+	CSession::NpcContainer_t::iterator newit = m_session.get().removeMob(m_id);
 
 	/* TODO: Here of 1 Hz-thread ? */
 	if (m_ship.id != 80 && m_ship.id != 81)
@@ -328,6 +327,7 @@ void CMob::die()
 		m_session.get().addMob(newMobPostMortum);
 		newMobPostMortum->spawn();
 	}
+	return newit;
 }
 
 damage_t CMob::receiveDamageSHD(damage_t dmg, id_t from)

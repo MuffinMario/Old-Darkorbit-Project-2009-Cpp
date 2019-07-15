@@ -12,11 +12,12 @@
 typedef boost::asio::ip::tcp tcp_t;
 class CGameServer
 {
+	boost::asio::io_service& io;
 	tcp_t::acceptor acceptor_;
 	unsigned short	m_port;
 public:
 	/* default constructor: normal i/o service and a port where the server is running on */
-	CGameServer(boost::asio::io_service& io_service, unsigned short& port) : acceptor_(io_service, tcp_t::endpoint(tcp_t::v4(), port)) {
+	CGameServer(boost::asio::io_service& io_service, unsigned short& port) : io(io_service),acceptor_(io_service, tcp_t::endpoint(tcp_t::v4(), port)) {
 		m_port = port;
 		start();
 	}

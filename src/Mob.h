@@ -77,7 +77,7 @@ public:
 	damage_t receiveDamageSHD(damage_t dmg, id_t from);
 
 	
-	void die();
+	CSession::NpcContainer_t::iterator die();
 	void rewardLoot();
 	void dropResources();
 

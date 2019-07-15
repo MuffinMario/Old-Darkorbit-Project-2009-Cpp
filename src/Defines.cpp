@@ -1,14 +1,26 @@
 #include "Defines.h"
 #include <iomanip>
 
+std::ostream& operator<<(std::ostream& os, Position_t pos)
+{
+	return os << "(" << pos.first << "|" << pos.second << ")";
+}
 long long getTimeNow()
 {
 	using namespace std::chrono;
 	return duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
 }
+long long getTimeNowDelta(long long offset)
+{
+	using namespace std::chrono;
+	return duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count() + offset;
+}
 
-bool timeHasPassed(long long timestamp, long long time) {
-	return timestamp + time < getTimeNow(); 
+bool timeHasPassed(long long timestamp, long long offset) {
+	return timestamp + offset < getTimeNow();
+}
+bool timeHasPassed(long long timestamp) {
+	return timestamp < getTimeNow();
 }
 std::string to_string(bool b) {
 	return b ? "1" : "0";

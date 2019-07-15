@@ -1,6 +1,10 @@
 #include "PlayerHandler.h"
 #include "ResourceBox.h"
 #include "BonusBox.h"
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #define DBG_PACKETCLI
 
 // remove later
@@ -17,7 +21,7 @@ std::map<level_t, exp_t> g_levelTable;
 std::map<level_t, exp_t> g_droneLevelTable;
 std::map<shipid_t, CShipInfo> g_shipinfo;
 
-CFileWriter g_filewrite("C:/xampp/htdocs/log.txt");
+CFileWriter g_filewrite("log.txt");
 
 extern std::map<id_t, std::mutex> g_emutex;
 
@@ -304,7 +308,7 @@ void CPlayerHandler::disconnectUser() {
 	if(m_currentSession)
 		sendEveryone(m_sendpacket.removeOpponent(m_id));
 	if(m_currentSession)
-		m_currentSession->leaveSession(m_sessionId);
+		m_currentSession->leaveSession(m_id);
 	m_socket.close();	
 }
 
@@ -565,15 +569,17 @@ void CPlayerHandler::handleAttack(id_t uid) /*noexcept*/ {
 
 void CPlayerHandler::detonateSMB()
 {
+	// After 10 secs: SMB available again
 	m_pbIsInSMBCooldown = false; 
 	sendPacket("0|A|CLR|SMB");
 }
 
-void CPlayerHandler::detonateISH()
+void CPlayerHandler::detonateISH(long long delta)
 {
+	// After 3 secs
 	m_pbHasISH = false;
 	// After 10 secs: ISH item available again
-	std::this_thread::sleep_for(std::chrono::seconds(7));
+	std::this_thread::sleep_for(std::chrono::milliseconds(delta));
 	sendPacket("0|A|CLR|ISH");
 }
 
@@ -583,8 +589,10 @@ map_t CPlayerHandler::getUserIDisOnMap(id_t id) {
 	m_currentSession->lockConnectionsRead();
 	for (auto& conns : m_currentSession->getAllConnections()) {
 		if (conns.second->getID() == id)
+		{ /// well well well look who forgot the brackets
 			m_currentSession->unlockConnectionsRead();
 			return conns.second->getMapId();
+		}
 	}
 	m_currentSession->unlockConnectionsRead();
 	return 0;
@@ -665,7 +673,7 @@ void CPlayerHandler::logInPackets() {
 		std::string map_m = m_sendpacket.loadMiniMap(m_player.mapid);
 		//dcout << "size: " << m_sAllInSession.size() << " - found sID in map " << m_player.mapid << ": " << m_sAllInSession[m_player.mapid].containsSessionId(m_sessionId) << cendl;
 		try {
-			g_sessionsManager.joinSession(shared_from_this(),m_sessionId,m_player.mapid);
+			g_sessionsManager.joinSession(shared_from_this(),m_id,m_player.mapid);
 			m_currentSession = &g_sessionsManager.getAnySession(m_player.mapid);
 		}
 		catch (...)
@@ -765,8 +773,8 @@ void CPlayerHandler::jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y) {
 		dcout << "Jumping - session" << cendl;
 		try {
 			//m_sAllInSession[m_currentMap.getMapId()].leaveSession(m_sessionId);
-			m_currentSession->leaveSession(m_sessionId);
-			g_sessionsManager.joinSession(shared_from_this(), m_sessionId, m_player.mapid);
+			m_currentSession->leaveSession(m_id);
+			g_sessionsManager.joinSession(shared_from_this(), m_id, m_player.mapid);
 			m_currentSession = &g_sessionsManager.getAnySession(m_player.mapid);
 			/*
 		m_sAllInSession[wantedMapID].joinSession(shared_from_this(), m_sessionId);
@@ -785,7 +793,7 @@ void CPlayerHandler::jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y) {
 		sendPacket("0|B|2|3|4|7|8");
 		sendPacket("0|3|1|2|3");
 		sendPacket("0|8");
-
+		sendPacket("0|A|RCD"); // rocket cooldown reset due to jump interrupt
 		//also sets m_currentMap
 		dcout << "Jumping - generating" << cendl;
 		generateObjects(wantedMapID);
@@ -914,7 +922,7 @@ void CPlayerHandler::generatePlayer() {
 	// dont catch mysql_exception, this function gets called in a try-catch environment
 	m_currentSession->lockConnectionsRead();
 	for (auto& it : m_currentSession->getAllConnections()) {
-		if (it.first != m_sessionId)
+		if (it.first != m_id)
 		{
 			id_t uid = it.second->getID();
 			shipid_t shipID = DBUtil::funcs::getShip(uid);
@@ -949,9 +957,9 @@ void CPlayerHandler::generateAliens() {
 	m_currentSession->lockMobsRead();
 	for(auto mob: m_currentSession->getMobs())
 	{
-		if (mob != nullptr)
+		if (mob.second != nullptr)
 		{
-			mob->spawn(m_id);
+			mob.second->spawn(m_id);
 		}
 	}
 	m_currentSession->unlockMobsRead();
@@ -962,9 +970,9 @@ void CPlayerHandler::generateCollectables()
 	m_currentSession->lockCollectablesRead();
 	for (auto coll : m_currentSession->getCollectables())
 	{
-		if (coll != nullptr)
+		if (coll.second != nullptr) //TODO: test if actually neccesary, on all generate functions
 		{
-			coll->spawn(m_id);
+			coll.second->spawn(m_id);
 		}
 	}
 	m_currentSession->unlockCollectablesRead();
@@ -1001,27 +1009,24 @@ void CPlayerHandler::generatePlayer(id_t id) {
 }
 void CPlayerHandler::checkForObjectsToInteract() {
 	
-	bool closeToGate = false;
-	bool closeToStation = false;
-	bool inRadiationzone = false;
 
 	//for the sake of multiple read/writes these two for each loops have to create temporary new "Portals/Stations" instead of iterating through them.
 	auto portals = m_currentMap.getPortals();
 	auto stations = m_currentMap.getStations();
 
-	closeToGate = std::any_of(portals.begin(), portals.end(), [&](const CPortal& p) {
+	m_bCloseToGate = std::any_of(portals.begin(), portals.end(), [&](const CPortal& p) {
 		return isInRangeCircle(CPortal::RANGE, p.x, p.y);
 	});
-	closeToStation = std::any_of(stations.begin(), stations.end(), [&](const CStation& s) {
+	m_bCloseToStation = std::any_of(stations.begin(), stations.end(), [&](const CStation& s) {
 		return isInRangeSquare(CPortal::RANGE, s.x, s.y);
 	});
 
 	auto pos = m_mm->get_current_position();
-	inRadiationzone = pos.first > m_currentMap.getWidth() || pos.first < 0 ||
+	m_bInRadiationzone = pos.first > m_currentMap.getWidth() || pos.first < 0 ||
 		pos.second > m_currentMap.getHeight() || pos.second < 0;
 	//TO-DO add other check, etc.
 
-	std::string packet = m_sendpacket.events(closeToGate && this->getShieldPreventTime() ? 1 : closeToStation ? 1: 0, m_bIsRepairing, closeToStation, inRadiationzone, closeToGate, 0);
+	std::string packet = m_sendpacket.events(m_bCloseToGate && this->getShieldPreventTime() ? 1 : m_bCloseToStation ? 1: 0, m_bIsRepairing, m_bCloseToStation, m_bInRadiationzone, m_bCloseToGate, 0);
 	sendPacket(packet);
 }
 bool CPlayerHandler::isInRangeCircle(int radius, pos_t objx, pos_t objy) {
@@ -1371,18 +1376,22 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 
 					if (packetIsLevel(SPECIAL_SMARTBOMB, 1)) {
 						//high priority
-						m_pbIsInSMBCooldown = true;
-						sendPacket("0|A|CLD|SMB|10");
-
-						std::string userID_string = lexical_cast<std::string>(m_id);
-						sendEveryone("0|n|SMB|" + userID_string);
-
-						m_asyncThreads.push_back(async_func(10000, &CPlayerHandler::detonateSMB));
-
-
-						//race condition prevention
-						if (m_pbIsInSMBCooldown)
+						long long SMB_CD_MS = 10000; // TODO <- premium? other stuff?
+						if (timeHasPassed(m_smb_next_use))
 						{
+							m_smb_next_use = getTimeNowDelta(SMB_CD_MS);
+							m_pbIsInSMBCooldown = true;
+
+							std::string cooldownPacket = "0|A|CLD|SMB|";
+							cooldownPacket += to_string(SMB_CD_MS / 1000);
+							sendPacket(cooldownPacket);
+
+							std::string userID_string = lexical_cast<std::string>(m_id);
+							sendEveryone("0|n|SMB|" + userID_string);
+
+							m_asyncThreads.push_back(async_func(10000, &CPlayerHandler::detonateSMB));
+
+
 
 							m_currentSession->lockConnectionsRead();
 							for (auto& it : m_currentSession->getAllConnections()) {
@@ -1397,15 +1406,21 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						}
 					}
 					else if (packetIsLevel(SPECIAL_INSTASHIELD, 1)) {
-						//high priority
-						m_pbHasISH = true;
-						sendPacket("0|A|CLD|ISH|10");
+						long long ISH_CD_MS = 10000; // TODO <- premium? other stuff?
+						if (timeHasPassed(m_ish_next_use))
+						{
+							m_ish_next_use = getTimeNowDelta(ISH_CD_MS);
+							m_pbHasISH = true;
 
-						std::string userID_string = lexical_cast<std::string>(m_id);
-						sendEveryone("0|n|ISH|" + userID_string);
+							std::string cooldownPacket = "0|A|CLD|ISH|";
+							cooldownPacket += to_string(ISH_CD_MS / 1000);
+							sendPacket(cooldownPacket);
 
-						m_asyncThreads.push_back(async_func(3000, &CPlayerHandler::detonateISH));
-
+							std::string userID_string = lexical_cast<std::string>(m_id);
+							sendEveryone("0|n|ISH|" + userID_string);
+							long long delta = ISH_CD_MS - 3000;
+							m_asyncThreads.push_back(async_func(3000, &CPlayerHandler::detonateISH, delta));
+						}
 					}
 
 					else if (packetIsLevel(SPECIAL_REPBOT, 1))
@@ -1425,6 +1440,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						else
 						{
 							//idk some predetermined message maybe?
+							sendMessagePacket("Cannot repair right now.");
 						}
 					}
 					else if (packetIsLevel(SPECIAL_CLOAK, 1))
@@ -1542,7 +1558,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						m_socket.close();
 					}
 					else if (packetIs("DBG_YEAHBOXES")) {
-						for (int i = 0; i < 20000; i++)
+						for (int i = 0; i < 2000; i++)
 						{
 							m_currentSession->addCollectable(CBonusBox::generateNewBonusBox(m_currentSession->generateNewCollectableId(), m_currentSession->getMapId(), *m_currentSession));
 						}
@@ -1783,17 +1799,18 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 #ifdef A
 					else if (packetIs("DBG_AI_BOOM"))
 					{
-						std::vector<std::shared_ptr<CMob>> allNpcs = m_currentSession->getMobs();
-						for(auto mob : allNpcs)
+						CSession::NpcContainer_t allNpcs = m_currentSession->getMobs();
+						std::vector<std::shared_ptr<CMob>> mobs;
+						for (auto mob : allNpcs)
 						{
-							if(mob)
-							{ 
-								mob->die();
-							}
-							else
+							if (mob.second)
 							{
-								//dcout << "mob in iteration is nullptr" << cendl;
+								mobs.push_back(mob.second);
 							}
+						}
+						for (auto mob : mobs)
+						{
+							mob->die();
 						}
 					}
 					else if (packetIs("DBG_UPDATE_MY_SPEED"))
@@ -1803,8 +1820,10 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					}
 					else if (packetIs("DBG_AI_FIRE"))
 					{
-						for(auto mob : m_currentSession->getMobs())
-						{
+						m_currentSession->lockMobsRead();
+						for(auto mobpair : m_currentSession->getMobs())
+						{	
+							std::shared_ptr<CMob>& mob = mobpair.second;
 							if (mob)
 							{
 								id_t id = m_id;
@@ -1819,6 +1838,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 								mob->abort();
 							}
 						}
+						m_currentSession->unlockMobsRead();
 					}
 					else if (packetIs("DBG_HESOYAM"))
 					{
@@ -1838,15 +1858,17 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					{
 						const int distance = 250;
 
-						for(auto mob : m_currentSession->getMobs())
+						for(auto mobpair : m_currentSession->getMobs())
 						{
+							std::shared_ptr<CMob>& mob = mobpair.second;
 							if (mob)
 							{
-								unsigned int degree = random<uint32_t>(360);
+								unsigned int deg = random<uint32_t>(360);
 								auto pos = mob->getPosition();
 								auto mypos = m_mm->get_current_position();
 								decltype(pos) newmobpos = std::make_pair(mypos.first,mypos.second);
 								//x
+								double degree = deg * M_PI / 180.0;
 								newmobpos.first += distance * std::cos(degree);
 								newmobpos.second += distance * std::sin(degree);
 								mob->move(newmobpos.first,newmobpos.second);
@@ -1958,7 +1980,7 @@ damage_t CPlayerHandler::receiveDamageHP(damage_t dmg) {
 	if (hp <= 0) {
 		realdmg += hp; // 5000 DMG 4000 HP -> -1000 thus 5000 + (-1000) = 4000
 		m_player.hp = 0;
-		die();
+		return -dmg;
 	}
 	else
 	{
@@ -1993,8 +2015,7 @@ damage_t CPlayerHandler::receiveDamageSHD(damage_t dmg) {
 
 void CPlayerHandler::die()
 {
-	
-	try {
+ 	try {
 		sendEveryone(m_sendpacket.kill(m_id));
 		map_t respawnMap = 1;
 		switch (m_player.fractionid)
@@ -2017,7 +2038,6 @@ void CPlayerHandler::die()
 		}
 		//sendEveryone(m_sendpacket.removeOpponent(m_id),m_currentMap.getMapId());
 		disconnectUser();
-
 	}
 	catch (boost::exception_ptr& e) {
 		std::cerr << BOOST_CERR_OUTPUT(e) << std::endl;

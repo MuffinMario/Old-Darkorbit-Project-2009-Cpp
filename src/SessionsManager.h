@@ -63,15 +63,15 @@ public:
 		return false;
 	}
 
-	void joinSession(const handlePtr user, std::string sessionID, map_t mapID)
+	void joinSession(const handlePtr user, id_t userID, map_t mapID)
 	{
 		if (mapIsInPermanent(mapID))
 		{
-			getPermanentSession(mapID).joinSession(user, sessionID);
+			getPermanentSession(mapID).joinSession(user, userID);
 		}
 		else
 		{
-			createTempSession(mapID).joinSession(user, sessionID);
+			createTempSession(mapID).joinSession(user, userID);
 		}
 	}
 

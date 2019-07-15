@@ -2,7 +2,7 @@
 
 void CPolicyServer::start_accept()
 {
-	CPolicyHandler::tcppointer newconnection = CPolicyHandler::createConnection(m_acceptor.get_io_service(), m_port);
+	CPolicyHandler::tcppointer newconnection = CPolicyHandler::createConnection(io, m_port);
 
 	m_acceptor.async_accept(newconnection->getSocket(), boost::bind(&CPolicyServer::handle_accept, this, newconnection, boost::asio::placeholders::error));
 }
