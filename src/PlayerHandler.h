@@ -149,7 +149,7 @@ private:
 	//maybe add this shared pointer too
 	void handleAttack(id_t) /*noexcept*/;
 	void detonateSMB();
-	void detonateISH();
+	void detonateISH(long long delta);
 	//handling function once we sent something to (a) client(s)
 	void handle_write(const boost::system::error_code& ec, size_t bytes);
 

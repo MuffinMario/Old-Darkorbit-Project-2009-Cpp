@@ -574,12 +574,12 @@ void CPlayerHandler::detonateSMB()
 	sendPacket("0|A|CLR|SMB");
 }
 
-void CPlayerHandler::detonateISH()
+void CPlayerHandler::detonateISH(long long delta)
 {
 	// After 3 secs
 	m_pbHasISH = false;
 	// After 10 secs: ISH item available again
-	std::this_thread::sleep_for(std::chrono::seconds(7));
+	std::this_thread::sleep_for(std::chrono::milliseconds(delta));
 	sendPacket("0|A|CLR|ISH");
 }
 
@@ -1418,8 +1418,8 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 
 							std::string userID_string = lexical_cast<std::string>(m_id);
 							sendEveryone("0|n|ISH|" + userID_string);
-
-							m_asyncThreads.push_back(async_func(3000, &CPlayerHandler::detonateISH));
+							long long delta = ISH_CD_MS - 3000;
+							m_asyncThreads.push_back(async_func(3000, &CPlayerHandler::detonateISH, delta));
 						}
 					}
 
