@@ -37,6 +37,8 @@ protected:
 
 	std::atomic_llong m_last_repair_prevention{ 0 };
 	std::atomic_llong m_last_shield_prevention{ 0 };
+	std::atomic_llong m_ish_next_use{ 0 };
+	std::atomic_llong m_smb_next_use{ 0 };
 	std::atomic_llong m_last_naz_prevention{ 0 };
 	std::atomic_bool m_blogout_cancel{ 0 };
 	std::atomic_llong m_last_logout_time{ 0 };
@@ -70,7 +72,9 @@ public:
 	bool		isInRadiationzone() const { return m_bInRadiationzone; }
 	void		setInRadiationzone(bool inradiation) { m_bInRadiationzone = inradiation; }
 
+	//This is unused for now, maybe we can do something with this later.
 	int			getSecondsInRadiationzone() { return m_secondsInRadiationzone; }
+	//This is unused for now, maybe we can do something with this later.
 	void		setSecondsInRadiationzone(int to) { m_secondsInRadiationzone = to; }
 
 	id_t		getID()		const { return m_id; }
@@ -124,6 +128,9 @@ public:
 	
 	void toggleLogoutCancel(bool yesorno) { m_blogout_cancel = yesorno; }
 
+	virtual void updateHealth(damage_t dmg) = 0;
+	virtual void updateShield(damage_t dmg) = 0;
+	virtual void updateHitpoints(damage_t dmg) = 0;
 
 	virtual void checkForObjectsToInteract() = 0;
 

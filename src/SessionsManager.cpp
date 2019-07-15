@@ -3,6 +3,8 @@
 #include "Collectable.h"
 #include "ResourceBox.h"
 #include "DatabaseUtils.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 void CSessionsManager::fastTick()
 {
@@ -115,7 +117,7 @@ void CSessionsManager::fastTick()
 								// (point enemy <-> point self    just make 2 points degree ez bye
 								auto pos = mp->getPosition();
 								auto mypos = Position_t(userIfTriggered->getX(), userIfTriggered->getY());
-								unsigned int degree = random<uint32_t>(360); //atan2(mypos.second - pos.second, mypos.first - pos.first);
+								double degree = random<uint32_t>(360) * M_PI / 180.0; //atan2(mypos.second - pos.second, mypos.first - pos.first);
 								decltype(pos) newmobpos = std::make_pair(mypos.first, mypos.second);
 								//x
 								newmobpos.first += DISTANCE_CLOSE * std::cos(degree);
@@ -125,7 +127,7 @@ void CSessionsManager::fastTick()
 							}
 							else if (distance > DISTANCE_MAX_TILL_CIRCLE)
 							{
-								unsigned int degree = random<uint32_t>(360);
+								double degree = random<uint32_t>(360) * M_PI / 180.0;
 								auto pos = mp->getPosition();
 								auto mypos = Position_t(userIfTriggered->getX(), userIfTriggered->getY());
 								decltype(pos) newmobpos = std::make_pair(mypos.first, mypos.second);
@@ -140,7 +142,7 @@ void CSessionsManager::fastTick()
 								//* TOO CLOSE * /
 								auto pos = mp->getPosition();
 								auto mypos = Position_t(userIfTriggered->getX(), userIfTriggered->getY());
-								unsigned int degree = random<uint32_t>(360);
+								unsigned int degree = random<uint32_t>(360) * M_PI / 180.0;
 								decltype(pos) newmobpos = std::make_pair(mypos.first, mypos.second);
 								//x
 								newmobpos.first += DISTANCE_CLOSE * std::cos(degree);
@@ -163,6 +165,7 @@ void CSessionsManager::fastTick()
 					}
 					else{
 						//handle "roaming"
+						/* TODO: FIX ON RADIATION ZONE */
 						int randx = 0;
 						int randy = 0;
 						const int RANGE = 10000;
@@ -221,7 +224,9 @@ void CSessionsManager::secondTick()
 			handlePtr& player = player_pair.second; //copy shared ptr for ref count
 			if (player)
 			{
+				player->checkForObjectsToInteract();
 				DBUtil::funcs::setPos(player->getID(), player->getPos());
+
 				//radiation zone check
 				bool isInRad = player->isInRadiationzone();
 				int secondsInRad = player->getSecondsInRadiationzone();
@@ -232,17 +237,38 @@ void CSessionsManager::secondTick()
 					else
 					{
 						player->setSecondsInRadiationzone(++secondsInRad);
-						// d(t) = maxhp*0.01 + t^2*maxhp*0.01
-						// 1% of hp + time squared * 1% of hp
-						damage_t dmg = player->getMaxHP() * 0.01 + secondsInRad * secondsInRad * player->getMaxHP() * 0.01;
+						// damage is relative to distance in radiation zone
+						Position_t pos = player->getPos();
+						//signed < unsigned is not a beauty
+						pos_t mapWidth = static_cast<pos_t>(session.getMap().getWidth());
+						pos_t mapHeight = static_cast<pos_t>(session.getMap().getHeight());
+						pos_t dx = 0,dy = 0;
+
+						if (pos.first < 0 || pos.first > mapWidth)
+							dx = pos.first - (pos.first > mapWidth ? mapWidth : 0);
+						if (pos.second < 0 || pos.second > mapHeight)
+							dy = pos.second - (pos.second > mapHeight ? mapHeight : 0);
+						double distance = std::sqrt(dx * dx + dy * dy);
+
+						health_t maxHP = player->getMaxHP();
+						damage_t dmg = 0;
+
+						if (distance > CMap::RADIATIONZONE_DISTANCE_STRONG)
+							dmg = maxHP * 0.10;
+						else if (distance > CMap::RADIATIONZONE_DISTANCE_MEDIUM)
+							dmg = maxHP * 0.05;
+						else if (distance > CMap::RADIATIONZONE_DISTANCE_WEAK)
+							dmg = maxHP * 0.01;
 
 						bool dead = player->receiveDamageHP(dmg) < 0;
 						// i am unhappy with this solution
 						if (dead)
 						{
 							goingToDiePlayers.push_back(player);
-							continue; // dead, we dont care
+							continue; // dead, we dont care about the other ifs
 						}
+						else
+							player->updateHealth(dmg); // make a bubble function?
 						
 					}
 				}
@@ -268,7 +294,6 @@ void CSessionsManager::secondTick()
 						}
 					}
 				}
-				player->checkForObjectsToInteract();
 
 			}
 			else
@@ -276,13 +301,18 @@ void CSessionsManager::secondTick()
 				dcout << "Player is nullptr this is a major crime call 9-1-1" << cendl;
 			}
 		}
+		if (goingToDiePlayers.size() != 0)
+		{
+			dcout << "WAiting for input on death" << cendl;
+			std::cin.get();
+		}
 		session.unlockConnectionsRead();
 		//I did put effort that deleting a player twice cannot occur, but you know there will be cases, so the worst case that should have been taken care of by CSession should be:
 		// 1. Player dies by radiation zone
 		// 2. before the program reaches this for loop somebody kills the player in an attacker thread
 		// 3. the player is removed from connectionTable ( shared_ptr from goingToDiePlayers keeps player data "alive", but hes removed from the table nontheless)
 		// 4. the player will not get removed again in this for loop (?????)
-		// TODO: TEST THIS BY BREAKPOINTING ON ABOVE session.unlockConnectionsRead(); 
+		// TODO: TEST THIS BY BREAKPOINTING BEFORE DIE()
 		for (auto& players : goingToDiePlayers)
 		{
 			players->die();

@@ -1,6 +1,10 @@
 #include "PlayerHandler.h"
 #include "ResourceBox.h"
 #include "BonusBox.h"
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #define DBG_PACKETCLI
 
 // remove later
@@ -17,7 +21,7 @@ std::map<level_t, exp_t> g_levelTable;
 std::map<level_t, exp_t> g_droneLevelTable;
 std::map<shipid_t, CShipInfo> g_shipinfo;
 
-CFileWriter g_filewrite("C:/xampp/htdocs/log.txt");
+CFileWriter g_filewrite("log.txt");
 
 extern std::map<id_t, std::mutex> g_emutex;
 
@@ -565,12 +569,14 @@ void CPlayerHandler::handleAttack(id_t uid) /*noexcept*/ {
 
 void CPlayerHandler::detonateSMB()
 {
+	// After 10 secs: SMB available again
 	m_pbIsInSMBCooldown = false; 
 	sendPacket("0|A|CLR|SMB");
 }
 
 void CPlayerHandler::detonateISH()
 {
+	// After 3 secs
 	m_pbHasISH = false;
 	// After 10 secs: ISH item available again
 	std::this_thread::sleep_for(std::chrono::seconds(7));
@@ -1370,18 +1376,22 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 
 					if (packetIsLevel(SPECIAL_SMARTBOMB, 1)) {
 						//high priority
-						m_pbIsInSMBCooldown = true;
-						sendPacket("0|A|CLD|SMB|10");
-
-						std::string userID_string = lexical_cast<std::string>(m_id);
-						sendEveryone("0|n|SMB|" + userID_string);
-
-						m_asyncThreads.push_back(async_func(10000, &CPlayerHandler::detonateSMB));
-
-
-						//race condition prevention
-						if (m_pbIsInSMBCooldown)
+						long long SMB_CD_MS = 10000; // TODO <- premium? other stuff?
+						if (timeHasPassed(m_smb_next_use))
 						{
+							m_smb_next_use = getTimeNowDelta(SMB_CD_MS);
+							m_pbIsInSMBCooldown = true;
+
+							std::string cooldownPacket = "0|A|CLD|SMB|";
+							cooldownPacket += to_string(SMB_CD_MS / 1000);
+							sendPacket(cooldownPacket);
+
+							std::string userID_string = lexical_cast<std::string>(m_id);
+							sendEveryone("0|n|SMB|" + userID_string);
+
+							m_asyncThreads.push_back(async_func(10000, &CPlayerHandler::detonateSMB));
+
+
 
 							m_currentSession->lockConnectionsRead();
 							for (auto& it : m_currentSession->getAllConnections()) {
@@ -1396,15 +1406,21 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						}
 					}
 					else if (packetIsLevel(SPECIAL_INSTASHIELD, 1)) {
-						//high priority
-						m_pbHasISH = true;
-						sendPacket("0|A|CLD|ISH|10");
+						long long ISH_CD_MS = 10000; // TODO <- premium? other stuff?
+						if (timeHasPassed(m_ish_next_use))
+						{
+							m_ish_next_use = getTimeNowDelta(ISH_CD_MS);
+							m_pbHasISH = true;
 
-						std::string userID_string = lexical_cast<std::string>(m_id);
-						sendEveryone("0|n|ISH|" + userID_string);
+							std::string cooldownPacket = "0|A|CLD|ISH|";
+							cooldownPacket += to_string(ISH_CD_MS / 1000);
+							sendPacket(cooldownPacket);
 
-						m_asyncThreads.push_back(async_func(3000, &CPlayerHandler::detonateISH));
+							std::string userID_string = lexical_cast<std::string>(m_id);
+							sendEveryone("0|n|ISH|" + userID_string);
 
+							m_asyncThreads.push_back(async_func(3000, &CPlayerHandler::detonateISH));
+						}
 					}
 
 					else if (packetIsLevel(SPECIAL_REPBOT, 1))
@@ -1424,6 +1440,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						else
 						{
 							//idk some predetermined message maybe?
+							sendMessagePacket("Cannot repair right now.");
 						}
 					}
 					else if (packetIsLevel(SPECIAL_CLOAK, 1))
@@ -1846,11 +1863,12 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							std::shared_ptr<CMob>& mob = mobpair.second;
 							if (mob)
 							{
-								unsigned int degree = random<uint32_t>(360);
+								unsigned int deg = random<uint32_t>(360);
 								auto pos = mob->getPosition();
 								auto mypos = m_mm->get_current_position();
 								decltype(pos) newmobpos = std::make_pair(mypos.first,mypos.second);
 								//x
+								double degree = deg * M_PI / 180.0;
 								newmobpos.first += distance * std::cos(degree);
 								newmobpos.second += distance * std::sin(degree);
 								mob->move(newmobpos.first,newmobpos.second);

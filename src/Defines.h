@@ -69,10 +69,13 @@ typedef unsigned short clanstate_t;
 typedef unsigned short stationtype_t;
 typedef int damage_t;
 
+std::ostream& operator<<(std::ostream& os, Position_t pos);
 // Time in milliseconds
 long long getTimeNow();
-/* Returns true if timestamp has been longer ago than time*/
-bool timeHasPassed(long long timestamp, long long time);
+long long getTimeNowDelta(long long offset);
+/* Returns true if timestamp+time is less than the current time in ms */
+bool timeHasPassed(long long timestamp, long long offset);
+bool timeHasPassed(long long timestamp);
 template<typename T>
 T random();
 template<typename T>
