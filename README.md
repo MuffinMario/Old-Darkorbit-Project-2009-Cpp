@@ -9,7 +9,7 @@ Well as you might have already read the former text, this is a project I did to 
 1. src:
 This is the folder that contains the source of the project. You need two external libraries to run this project.
 
-  - boost 1.60 (http://www.boost.org/users/history/version_1_60_0.html)
+  - boost 1.70
   - MySQL C Connector 6.1 (https://dev.mysql.com/downloads/connector/c/) (VERSIONID 50716)
 
 2. bin_swf:
@@ -18,10 +18,10 @@ This is the folder that includes all files that go into the browser of the clien
 You need your own CMS. Although there are many folders and files, the only important things I remarkably changed(added) in bin_swf were \, \spacemap_backup and \files
 
 3. database:
-Well... the database. It is derived from manulaiko's old "old darkorbit project" but changed to adapt to more stylistic design choices and more flexibility.
+Well... the database. It is derived from manulaiko's old "old darkorbit project" but changed to slightly to follow core concepts of database keeping, but still needs a total revamp in order to implement configurations.
 ## What else do I need?
 You need to import the phpmyadmin mysql file which the server runs on. 
-For further development you can always take a look at the packet list from manulaiko which has been greatly improved by me
+For further development you can always take a look at the packet list from manulaiko which has been greatly improved by me. You can find it in the root directory of this project
 
 ## Which ports do I need to open?
 1. 843 TCP : This port is needed for the policy server to accept the connection
@@ -38,8 +38,10 @@ For further development you can always take a look at the packet list from manul
 - Gate jumping 
 - Position dependent UI changes
 - Working Server-Sided MovementManager (an a-little-bit-more-detailed version of the problems should exist in "MovementManager.h")
-- Semi thread-safe environment
-- Fully functional NPC behaviour, except Cubikon/Protegit and no bosses/ubers!
+- Fully functional NPC behaviour, except Cubikon/Protegit and no bosses/ubers, and escapes!
+- PvP
+- Some extras
+
 
 ## What needs to be implemented sooner or later (ToDo)
 - Configurations
