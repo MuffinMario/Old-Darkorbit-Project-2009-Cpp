@@ -41,19 +41,13 @@ For further development you can always take a look at the packet list from manul
 - Semi thread-safe environment
 - Fully functional NPC behaviour, except Cubikon/Protegit and no bosses/ubers!
 
-## What to do
-- Fix the rest of the thread-unsafe environment (sometimes on player death crash without tracelogs, etc.)
-- Add more NPC behaviour like "Stop following if player too far", "Stop following and wait before gate"(Currently follow you to gate)
-- No attack zones
-
 ## What needs to be implemented sooner or later (ToDo)
 - Configurations
-- Database revamp (each item having a unique id, type and equipped-on ID)
+- A total database revamp (each item having a unique id, type and equipped-on ID, configs are basically impossible atm)
 - website <-> spacemap "updates"
 - NPC flee on X% HP (15%?)
 - NPC shield regeneration
 - NPC stop interest after not been shot after X seconds (120?)
-- Minor thread safety things (user threadpool)
 - User SESSIONID verification with webserver on spacemap login
 - Finish missing extra items (also update on DB/webpage change)
 - Save settings and handle not yet handled parameters (S| - settings packet / d| - laser selected / r| - rocket select)
