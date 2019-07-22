@@ -120,7 +120,7 @@ loc39da:
 
 0|g|a|string|string						Set ammo prices
 
-0|r|id||oretype|x|y|isBomb("mine detonates in 5 seconds" afaik)			
+0|r|id|oretype|x|y|isBomb("mine detonates in 5 seconds" afaik)			
 										what we know:
 										1 prometium
 										2 endurium
