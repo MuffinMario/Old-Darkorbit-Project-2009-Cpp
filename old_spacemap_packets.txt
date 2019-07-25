@@ -121,13 +121,15 @@ loc39da:
 0|g|a|string|string						Set ammo prices
 
 0|r|id|oretype|x|y|isBomb("mine detonates in 5 seconds" afaik)			
-										what we know:
 										1 prometium
 										2 endurium
 										3 terbium
 										10 mine
 										20 detonating smartbomb
-
+										1xx-200 small firework with color: typeid-100 (two explosions)
+										2xx-300 medium firework with color: typeid-200 (two explosions)
+										3xx-... big firework with color:typeid-300 (three explosions)
+										(How exactly the colors are calculated is not of importance. random from 0-99 + size*100 should be enough to make colorful random fireworks)
 										
 0|l										Log off
 
@@ -455,9 +457,9 @@ from _loc2_[3] to _loc2_[15]
 										var myDronesDetails;
 0|n|e|UserID|UAV						Set UAV alternated
 
-0|n|FWI|FireworkID						Explode FireworID
+0|n|FWI|FireworkID						Explode FireworkID (set by 0|r|...)
 
-0|n|FWG|FireworksIDs					""
+0|n|FWG|FireworksID1|FireworkID2|...				Explodes all fireworkIDs given in shown scheme
 
 
 MAKE TDM AND SPACEBALL IN CONSTS
