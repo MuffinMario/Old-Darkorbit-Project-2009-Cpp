@@ -126,9 +126,9 @@ loc39da:
 										3 terbium
 										10 mine
 										20 detonating smartbomb
-										1xx-200 small firework with color: typeid-100 (two explosions)
-										2xx-300 medium firework with color: typeid-200 (two explosions)
-										3xx-... big firework with color:typeid-300 (three explosions)
+										1xy-200 small firework with company colors x and then y
+										2xy-300 medium firework with company colors x and then y
+										3xy-zxy big firework with company colors z - 2, x and then y
 										(How exactly the colors are calculated is not of importance. random from 0-99 + size*100 should be enough to make colorful random fireworks)
 										
 0|l										Log off
