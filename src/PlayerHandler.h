@@ -43,6 +43,9 @@
 #include "Mob.h"
 #include "Collectable.h"
 #include "ShipInfo.h"
+#include "RocketInfo.h"
+#include "OreInfo.h"
+#include "WorkerThreadPool.h"
 
 typedef boost::asio::ip::tcp tcp_t;
 
@@ -55,11 +58,13 @@ class CPlayerHandler :
 	public IHandler,
 	public std::enable_shared_from_this<CPlayerHandler>
 {
-	std::vector<boost::thread*>		m_asyncThreads;
+	/* Basically a thread pool*/
+	//boost::asio::thread_pool m_threadPool;
+	CWorkerThreadPool m_workerThreads;
+	//std::vector<boost::thread*>		m_asyncThreads;
 
 	CDamageManager					m_damageManager;
 	CSession*						m_currentSession = nullptr;
-	std::thread*					m_laser_thread; // unused atm
 
 
 	/* The fact that there is a PNG packet, which gets sent every 20 or so seconds where 
@@ -138,12 +143,12 @@ private:
 	CPlayerHandler(boost::asio::io_service& io_service, unsigned short& port, CSession* sm) :
 		m_socket(io_service),
 		m_currentSession(sm),
-		m_laser_thread(nullptr),
+		m_workerThreads(UINT_MAX),
 		IHandler()
 	{
+		
 		m_port = port;
 	}
-
 	void cloak();
 	void uncloak();
 	//maybe add this shared pointer too
@@ -156,6 +161,7 @@ private:
 	//handling function once we received something from a client
 	void handle_read(const boost::system::error_code & ec, size_t bytes);
 	void handle_read_b(size_t bytes);
+	void onSpaceStationTradeRequest();
 	void savePosToDB();
 	//sends a packet that serves as a message to the client (that red text when you get EXP/CRED/etc. for example
 	void sendMessagePacket(const std::string& text);
@@ -171,9 +177,14 @@ private:
 	void logInPackets();
 	//lists of packets that are sent when the user jumps, also setting variables
 	void jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y);
+	void setResourcePrices();
 
 	//async use; logs out when time is done and no interruption
 	void logoutHandle();
+	void onTrade(ore_t oreid, ore_t oreamount);
+
+	pos_t distanceTo(Position_t pos);
+	pos_t distanceTo(id_t id);
 
 	shield_t addSHD(shield_t shd) override;
 	health_t addHP(health_t hp) override;
@@ -183,7 +194,9 @@ private:
 	void updateHitpoints(damage_t dmg);
 	void updateAccount(); //cred,uri,jp
 	void updateSpeed(speed_t speed); //spd
-	
+	void updateCargo();
+	void refreshCargo();
+
 	//generate Gates, Stations, more
 	void generateObjects(map_t mapid);
 

@@ -37,7 +37,7 @@ void CSessionsManager::fastTick()
 		CSession& session = sessionIt.operator*();
 
 
-
+		auto timeNow = getTimeNow();
 		/* Start internal loop */
 		map_t map = session.getMapId();
 
@@ -74,7 +74,7 @@ void CSessionsManager::fastTick()
 								if (!player->m_pbIsInvisible && distance < Constants::Game::FIGHT_RANGE_NPC)//TODO: && !player->isInvisible())
 								{
 									mp->setFocusToPlayer(player->getID());
-									mp->setRealWaitingTime(0); // so it instantly flies towards enemy
+									mp->setRealWaitingTime(timeNow, 0); // so it instantly flies towards enemy
 									triggeredId = player->getID();
 									break;
 								}
@@ -84,15 +84,12 @@ void CSessionsManager::fastTick()
 
 					}
 				}
-				if (mp->isGreyed() && mp->getLastTimeShotByBelongedPlayer() + 10000 < getTimeNow())
+				if (timeHasPassed(timeNow, mp->getLastTimeShot(), 60000))
 				{
-
-					dcout << "Ungrey opponent: " << cendl;
-					mp->setLastTimeShotByBelongedPlayer(0); //* Kinda unncessary but who cares * /
-					mp->ungrey();
-					session.sendEveryone(m_pm.ungreyOpponent(mp->getId()));
+					//TODO SetHP SetSHD
+					mp->increaseHP(mp->getShip().hpmax * 0.05);
 				}
-				if (mp->getNextMovingTime() < getTimeNow())
+				if (mp->getNextMovingTime() < timeNow)
 				{
 
 					handlePtr userIfTriggered;
@@ -123,7 +120,7 @@ void CSessionsManager::fastTick()
 								newmobpos.first += DISTANCE_CLOSE * std::cos(degree);
 								newmobpos.second += DISTANCE_CLOSE * std::sin(degree);
 								mp->move(newmobpos.first, newmobpos.second);
-								mp->setRealWaitingTime(100);// 0.1 sec w8
+								mp->setRealWaitingTime(timeNow, 100);// 0.1 sec w8
 							}
 							else if (distance > DISTANCE_MAX_TILL_CIRCLE)
 							{
@@ -135,7 +132,7 @@ void CSessionsManager::fastTick()
 								newmobpos.first += DISTANCE_CLOSE * std::cos(degree);
 								newmobpos.second += DISTANCE_CLOSE * std::sin(degree);
 								mp->move(newmobpos.first, newmobpos.second);
-								mp->setRealWaitingTime(1500);// 0.1 sec w8
+								mp->setRealWaitingTime(timeNow, 1500);// 0.1 sec w8
 							}
 							else if (distance < DISTANCE_FOLLOW * 1.5)
 							{
@@ -148,12 +145,12 @@ void CSessionsManager::fastTick()
 								newmobpos.first += DISTANCE_CLOSE * std::cos(degree);
 								newmobpos.second += DISTANCE_CLOSE * std::sin(degree);
 								mp->move(newmobpos.first, newmobpos.second);
-								mp->setRealWaitingTime(1500);// 0.1 sec w8
+								mp->setRealWaitingTime(timeNow, 1500);// 0.1 sec w8
 							}
 							else
 							{
 								//* MOVEMENT IN RANGE * /
-								mp->setRealWaitingTime(1500);
+								mp->setRealWaitingTime(timeNow, 1500);
 							}
 						}
 						else
@@ -175,7 +172,7 @@ void CSessionsManager::fastTick()
 						} while (randx > session.getMap().getWidth() || randy > session.getMap().getHeight() || randx < 0 || randy < 0);
 
 						mp->move(randx, randy);
-						mp->generateRandomWaitingTime(2500, 15000);
+						mp->generateRandomWaitingTime(timeNow,2500, 15000);
 
 					}
 				}
@@ -216,7 +213,7 @@ void CSessionsManager::secondTick()
 			}
 		}
 		CSession& session = sessionIt.operator*();
-
+		auto timeNow = getTimeNow();
 		/* Connections */
 		session.lockConnectionsRead();
 		for (auto player_pair : session.getAllConnections())
@@ -363,6 +360,8 @@ void CSessionsManager::secondTick()
 		for (auto mobp : session.getMobs())
 		{
 			std::shared_ptr<CMob>& mp = mobp.second;
+			if (mp == nullptr) continue;
+
 			if (mp->getFocusedPlayer() > 0 && mp->getFocusedPlayer() < BEGIN_MOB_IDS &&
 				mp->attacking())
 			{
@@ -407,6 +406,19 @@ void CSessionsManager::secondTick()
 						//mp->setTriggerPerson(0);
 					}
 				}
+			}
+			if (mp->isGreyed() && mp->getLastTimeShotByBelongedPlayer() + 10000 < timeNow) // iterated 4000 times gettimenow() in fast tick and wonder why this function took so much time 
+			{
+
+				dcout << "Ungrey opponent: " << cendl;
+				mp->setLastTimeShotByBelongedPlayer(0); //* Kinda unncessary but who cares * /
+				mp->ungrey();
+				session.sendEveryone(m_pm.ungreyOpponent(mp->getId()));
+			}
+			if (timeHasPassed(timeNow, mp->getLastTimeShot(), 10000))
+			{
+				//TODO SetHP SetSHD
+				mp->increaseSHD(mp->getShip().shdmax * 0.05);
 			}
 		}
 		session.unlockMobsRead();

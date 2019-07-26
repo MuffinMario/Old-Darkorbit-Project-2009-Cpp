@@ -8,10 +8,10 @@
 #define DBG_PACKETCLI
 
 // remove later
-std::atomic_uint g_DBG_AITickRate = 1000/30;
+std::atomic_uint g_DBG_AITickRate = 1000 / 30;
 
 CDBGetter g_database_get("olddorps", "usuario", "cuentas", "id", 0); //default initalize
-CDBUpdater g_database_update("olddorps", "usuario", "cuentas", "id",0); //default initalize
+CDBUpdater g_database_update("olddorps", "usuario", "cuentas", "id", 0); //default initalize
 
 /* Contains all sessions. Meh... prefer it on global than static global */
 CSessionsManager g_sessionsManager;
@@ -20,6 +20,8 @@ std::map<map_t, CMap> g_allMaps;
 std::map<level_t, exp_t> g_levelTable;
 std::map<level_t, exp_t> g_droneLevelTable;
 std::map<shipid_t, CShipInfo> g_shipinfo;
+std::map<rockettype_t, CRocketInfo> g_rocketinfo;
+std::map<ore_t, COreInfo> g_oreinfo;
 
 CFileWriter g_filewrite("log.txt");
 
@@ -53,14 +55,14 @@ CPlayerHandler::~CPlayerHandler()
 	m_socket.close();
 }
 
-auto CPlayerHandler::createConnection(boost::asio::io_service & io_service, unsigned short port) -> CPlayerHandler::tcppointer
+auto CPlayerHandler::createConnection(boost::asio::io_service& io_service, unsigned short port) -> CPlayerHandler::tcppointer
 {
-	
-	CPlayerHandler *newhandle = new CPlayerHandler(io_service, port, nullptr);
+
+	CPlayerHandler* newhandle = new CPlayerHandler(io_service, port, nullptr);
 	return tcppointer(newhandle);
 }
 
-tcp_t::socket & CPlayerHandler::getSocket()
+tcp_t::socket& CPlayerHandler::getSocket()
 {
 	return m_socket;
 }
@@ -77,7 +79,7 @@ bool CPlayerHandler::attackID(id_t uid)
 		if (!m_pbIsAttacking) {
 			if (uid >= BEGIN_MOB_IDS || checkSelectedID(uid)) { // >= 120.000 = NPC
 																//m_pbIsAttacking = true;
-				
+
 				handleAttackRequest(uid);
 			}
 		}
@@ -94,7 +96,7 @@ void CPlayerHandler::onEPChange()
 	constexpr const level_t MAX_LEVEL = 32;
 	level_t currentLevel = m_player.lvl;
 	// what if user gets from level 1 to 4 see it has to be repetitive i mean there are other ways but this is the one i went with
-	while (currentLevel < MAX_LEVEL && 
+	while (currentLevel < MAX_LEVEL &&
 		g_levelTable[++currentLevel] <= m_player.exp)
 	{
 		//hooray level up
@@ -138,7 +140,7 @@ void CPlayerHandler::start()
 }
 void CPlayerHandler::login()
 {
-	
+
 	m_bLoginSent = true;
 	logInPackets();
 	cout << EColor::GREEN << "[SUCCESS] User " << m_player.username << " (SessionId: " << m_sessionId << ") logged in." << cendl;
@@ -146,11 +148,12 @@ void CPlayerHandler::login()
 
 }
 void CPlayerHandler::readData() {
-	boost::asio::async_read_until(m_socket, m_buffer,"\n",BASIC_BIND_READER(CPlayerHandler));
+	boost::asio::async_read_until(m_socket, m_buffer, "\n", BASIC_BIND_READER(CPlayerHandler));
 	//move received stream from m_buffer into m_information string to handle packet
 	//boost::asio::async_read_until(m_socket, m_buffer, "\n",
 	//	boost::bind(&CPlayerHandler::handle_read, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
+#define USE_ASYNC 1
 bool CPlayerHandler::sendPacket(const char* str)
 {
 	//dcout << "sendPacket: " << str << cendl;
@@ -180,7 +183,7 @@ bool CPlayerHandler::sendPacket(const char* str)
 	return true;
 
 }
-bool CPlayerHandler::sendPacketSynchronous(std::string & str)
+bool CPlayerHandler::sendPacketSynchronous(std::string& str)
 {
 	boost::asio::streambuf sendbuffer;
 	std::ostream os(&sendbuffer);
@@ -198,7 +201,7 @@ bool CPlayerHandler::sendPacketSynchronous(std::string & str)
 	}
 	return true;
 }
-bool CPlayerHandler::sendPacketSynchronous(const char * str)
+bool CPlayerHandler::sendPacketSynchronous(const char* str)
 {
 	//dcout << "sendPacket: " << str << cendl;
 	boost::asio::streambuf sendbuffer;
@@ -219,7 +222,6 @@ bool CPlayerHandler::sendPacketSynchronous(const char * str)
 }
 bool CPlayerHandler::sendPacket(const std::string& str) {
 	//dcout << "sendPacket: " << str << cendl;
-#define USE_ASYNC 1
 	boost::asio::streambuf sendbuffer;
 	std::ostream os(&sendbuffer);
 	os << str << (char)0;
@@ -284,14 +286,14 @@ bool CPlayerHandler::sendPackets(std::initializer_list<std::string> strs)
 	return true;
 }
 void CPlayerHandler::sendPacketAfter(int ms, std::string& str) {
-	m_asyncThreads.push_back(async_func(ms, static_cast<bool (CPlayerHandler::*)(const std::string&)>(&CPlayerHandler::sendPacket), std::ref(str)));
+	async_func(ms, static_cast<bool (CPlayerHandler::*)(const std::string&)>(&CPlayerHandler::sendPacket), std::ref(str));
 }
 void CPlayerHandler::sendPacketAfter(int ms, const char* str) {
-	m_asyncThreads.push_back(async_func(ms, static_cast<bool (CPlayerHandler::*)(const char*)>(&CPlayerHandler::sendPacket), str));
+	async_func(ms, static_cast<bool (CPlayerHandler::*)(const char*)>(&CPlayerHandler::sendPacket), str);
 }
 
 //packet sending handler, NOTE: UNUSED WHEN BOOST::ASIO::ASYNC_WRITE IS NOT USED
-void CPlayerHandler::handle_write(const boost::system::error_code & ec, size_t bytes) { }
+void CPlayerHandler::handle_write(const boost::system::error_code& ec, size_t bytes) { }
 
 void CPlayerHandler::disconnectUser() {
 	//m_socket.shutdown(boost::asio::m_socketbase::shutdown_type::shutdown_both);
@@ -304,12 +306,13 @@ void CPlayerHandler::disconnectUser() {
 	m_pbIsInSMBCooldown = false;
 	m_bLoginSent = false;
 	*/
+
 	suspendThreads();
-	if(m_currentSession)
+	if (m_currentSession)
 		sendEveryone(m_sendpacket.removeOpponent(m_id));
-	if(m_currentSession)
+	if (m_currentSession)
 		m_currentSession->leaveSession(m_id);
-	m_socket.close();	
+	m_socket.close();
 }
 
 bool CPlayerHandler::packetIs(const std::string& str) {
@@ -325,7 +328,7 @@ bool CPlayerHandler::makeDamage(damage_t dmg, handlePtr enemy) {
 	return enemy->receiveDamagePure(dmg) >= 0;
 }
 bool CPlayerHandler::makeDamage(damage_t dmg, std::shared_ptr<CMob> mob) {
-	return mob->receiveDamagePure(dmg,m_id) >= 0; //TODO IDK JUST CONTINUE
+	return mob->receiveDamagePure(dmg, m_id) >= 0; //TODO IDK JUST CONTINUE
 }
 
 damage_t CPlayerHandler::makeSAB(damage_t dmg, handlePtr enemy) {
@@ -345,7 +348,7 @@ damage_t CPlayerHandler::makeSAB(damage_t dmg, handlePtr enemy) {
 	return realdmg;
 }
 damage_t CPlayerHandler::makeSAB(damage_t dmg, std::shared_ptr<CMob> mob) {
-	damage_t realdmg = mob->receiveDamageSHD(dmg,m_id);
+	damage_t realdmg = mob->receiveDamageSHD(dmg, m_id);
 
 	//add shd to current player
 	shield_t p_shd = m_player.shd;
@@ -371,7 +374,7 @@ void CPlayerHandler::handleAttackRequest(id_t uid)
 {
 	if (!m_bIsAttackThreadRunning) {
 		m_bIsAttackThreadRunning = true;
-		m_asyncThreads.push_back(async_func(&CPlayerHandler::handleAttack,uid));
+		async_func(&CPlayerHandler::handleAttack, uid);
 	}
 
 }
@@ -421,7 +424,7 @@ void CPlayerHandler::handleAttack(id_t uid) /*noexcept*/ {
 				{
 					pos_t x = m_mm->get_current_position_x() - enemy->getX();
 					pos_t y = m_mm->get_current_position_y() - enemy->getY();
-					size_t distance = std::sqrt(x*x + y * y);
+					size_t distance = std::sqrt(x * x + y * y);
 					if (distance <= Constants::Game::FIGHT_RANGE_PLAYER)
 					{
 						/* IN RANGE */
@@ -490,7 +493,7 @@ void CPlayerHandler::handleAttack(id_t uid) /*noexcept*/ {
 
 					pos_t x = m_mm->get_current_position_x() - px;
 					pos_t y = m_mm->get_current_position_y() - py;
-					size_t distance = std::sqrt(x*x + y*y);
+					size_t distance = std::sqrt(x * x + y * y);
 					if (distance <= Constants::Game::FIGHT_RANGE_PLAYER)
 					{
 						/* IN RANGE */
@@ -570,7 +573,7 @@ void CPlayerHandler::handleAttack(id_t uid) /*noexcept*/ {
 void CPlayerHandler::detonateSMB()
 {
 	// After 10 secs: SMB available again
-	m_pbIsInSMBCooldown = false; 
+	m_pbIsInSMBCooldown = false;
 	sendPacket("0|A|CLR|SMB");
 }
 
@@ -584,7 +587,7 @@ void CPlayerHandler::detonateISH(long long delta)
 }
 
 map_t CPlayerHandler::getUserIDisOnMap(id_t id) {
-	
+
 	// returns the MAP ID of the user with the id "id"
 	m_currentSession->lockConnectionsRead();
 	for (auto& conns : m_currentSession->getAllConnections()) {
@@ -599,7 +602,7 @@ map_t CPlayerHandler::getUserIDisOnMap(id_t id) {
 }
 bool CPlayerHandler::checkSelectedID(id_t id)
 {
-	
+
 	//after a jump the id resets -> check if the selectedOpponent equals the attacker (f.e) and also the id must be NOT 0
 	if (m_selectedOpponent == id && m_selectedOpponent != 0) {
 		int currentMapID = m_currentMap.getMapId();
@@ -620,8 +623,8 @@ void CPlayerHandler::logInPackets() {
 		m_player.maxshd = DBUtil::funcs::getmaxSHD(m_id);
 		m_player.hp = DBUtil::funcs::getHP(m_id);
 		m_player.maxhp = DBUtil::funcs::getmaxHP(m_id);
-		m_player.cargospace = 100;
-		m_player.cargospacemax = g_shipinfo[m_player.shipid].getCargo();
+		refreshCargo();
+		std::cout << m_player.cargospace << "/" << m_player.cargospacemax << std::endl;
 		m_player.mapid = DBUtil::funcs::getMap(m_id);
 		m_player.fractionid = DBUtil::funcs::getCompany(m_id);
 		m_player.clanid = DBUtil::funcs::getUserClanId(m_id);
@@ -673,7 +676,7 @@ void CPlayerHandler::logInPackets() {
 		std::string map_m = m_sendpacket.loadMiniMap(m_player.mapid);
 		//dcout << "size: " << m_sAllInSession.size() << " - found sID in map " << m_player.mapid << ": " << m_sAllInSession[m_player.mapid].containsSessionId(m_sessionId) << cendl;
 		try {
-			g_sessionsManager.joinSession(shared_from_this(),m_id,m_player.mapid);
+			g_sessionsManager.joinSession(shared_from_this(), m_id, m_player.mapid);
 			m_currentSession = &g_sessionsManager.getAnySession(m_player.mapid);
 		}
 		catch (...)
@@ -682,29 +685,32 @@ void CPlayerHandler::logInPackets() {
 			std::cerr << "Session error: " << ::GetLastError() << std::endl;
 		}
 
-		sendPacket("0|A|SET|1|1|1|1|1|1|1|1|1|1|1|1|0|1|1|1|1|1|1|1|1|0|0|0|0");
-		sendPacket("0|u|1");
-		sendPacket("0|d|1");
-		sendPacket(std::ref(initalisepacket));
-		sendPacket(map_i);
-		sendPacket(map_m);
-		sendPacket("0|B|2|3|4|7|8");
-		sendPacket("0|3|1|2|3");
-		sendPacket("0|S|CFG|1");
-		if(m_player.isadmin)
-			sendPacket("0|A|ADM|CLI|1");
-		sendPacket("0|8");
+		sendPacketSynchronous("0|A|SET|1|1|1|1|1|1|1|1|1|1|1|1|0|1|1|1|1|1|1|1|1|0|0|0|0");
+		sendPacketSynchronous("0|u|1");
+		sendPacketSynchronous("0|d|1");
+		sendPacketSynchronous(initalisepacket);
+		sendPacketSynchronous(map_i);
+		sendPacketSynchronous(map_m);
+		sendPacketSynchronous("0|B|2|3|4|7|8");
+		sendPacketSynchronous("0|3|1|2|3");
+		updateCargo(); //async
+		sendPacketSynchronous("0|S|CFG|1");
+		setResourcePrices();
+
+		if (m_player.isadmin)
+			sendPacketSynchronous("0|A|ADM|CLI|1");
+		sendPacketSynchronous("0|8");
 
 		m_lasertype = 1;
 		m_rockettype = ERocketType::R310;
 
-		generateObjects(m_player.mapid);
-		generatePlayer();
-		generateCollectables();
-		generateAliens();
+		generateObjects(m_player.mapid);//async
+		generatePlayer();//async
+		generateCollectables();//async
+		generateAliens();//async
 		checkForObjectsToInteract();
 
-		std::string spawnMe = m_sendpacket.spawnEnemy(m_id, m_player.shipid, 3, m_player.clantag, m_player.username, x + 410, y + 300, m_player.fractionid, 220,m_player.rank, false, 1, 4);
+		std::string spawnMe = m_sendpacket.spawnEnemy(m_id, m_player.shipid, 3, m_player.clantag, m_player.username, x + 410, y + 300, m_player.fractionid, 220, m_player.rank, false, 1, 4);
 		std::string moveFix = m_sendpacket.move(m_id, x, y, x, y, 0);
 		std::string drones = "0|n|d|" + boost::lexical_cast<std::string>(m_id) + "|" + m_player.drones;
 
@@ -740,6 +746,7 @@ void CPlayerHandler::jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y) {
 		m_player.shipid = DBUtil::funcs::getShip(m_id);
 		m_player.speed = DBUtil::funcs::getSpeed(m_id);
 		m_player.mapid = wantedMapID;
+		refreshCargo();
 		m_player.premium = DBUtil::funcs::isPremium(m_id);
 		m_player.fractionid = DBUtil::funcs::getCompany(m_id);
 		m_player.clanid = DBUtil::funcs::getUserClanId(m_id);
@@ -786,14 +793,19 @@ void CPlayerHandler::jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y) {
 		}
 		//AFTER JUMP
 		dcout << "Jumping - post  jump" << cendl;
-		sendPacket(ss);
-		sendPacket(initalisepacket);
-		sendPacket(map_i);
-		sendPacket(map_m);
-		sendPacket("0|B|2|3|4|7|8");
-		sendPacket("0|3|1|2|3");
-		sendPacket("0|8");
-		sendPacket("0|A|RCD"); // rocket cooldown reset due to jump interrupt
+		sendPacketSynchronous(ss);
+		sendPacketSynchronous(initalisepacket);
+		sendPacketSynchronous(map_i);
+		sendPacketSynchronous(map_m);
+		sendPacketSynchronous(m_sendpacket.updateOres(m_player.loot.o1_prometium, m_player.loot.o1_endurium, m_player.loot.o1_terbium,
+			m_player.loot.o4_xenomit,
+			m_player.loot.o2_prometid, m_player.loot.o2_duranium,
+			m_player.loot.o3_promerium));
+		sendPacketSynchronous("0|B|2|3|4|7|8");
+		sendPacketSynchronous("0|3|1|2|3");
+		sendPacketSynchronous("0|8");
+		sendPacketSynchronous("0|A|RCD"); // rocket cooldown reset due to jump interrupt
+		setResourcePrices();
 		//also sets m_currentMap
 		dcout << "Jumping - generating" << cendl;
 		generateObjects(wantedMapID);
@@ -829,6 +841,18 @@ void CPlayerHandler::jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y) {
 	}
 }
 
+void CPlayerHandler::setResourcePrices()
+{
+	const double honorMultip = 1 + m_player.hon / 500000.0;
+	const double resourceMultiplier = boost::algorithm::clamp(honorMultip, 1.0, 2.0);
+	std::string pricePackets = m_sendpacket.setOrePrices(
+		g_oreinfo[1].getCreditPrice() * resourceMultiplier, g_oreinfo[2].getCreditPrice() * resourceMultiplier, g_oreinfo[3].getCreditPrice() * resourceMultiplier,
+		g_oreinfo[11].getCreditPrice() * resourceMultiplier, g_oreinfo[12].getCreditPrice() * resourceMultiplier,
+		g_oreinfo[13].getCreditPrice() * resourceMultiplier
+	);
+	sendPacket(pricePackets);
+}
+
 void CPlayerHandler::logoutHandle()
 {
 	uint64_t before_logout_sleep_time = m_last_logout_time;
@@ -839,6 +863,77 @@ void CPlayerHandler::logoutHandle()
 		//disconnectUser();
 		sendPacket("0|l");
 	}
+}
+
+void CPlayerHandler::onTrade(ore_t oreid, ore_t oreamount)
+{
+	// GET -> WORK -> SET
+	ore_t actualAmount = reduceOre(oreid, std::max(oreamount, (ore_t)0));
+	if (actualAmount > 0)
+	{
+		switch (oreid)
+		{
+		case 1:
+			DBUtil::funcs::removePrometium(m_id, actualAmount);
+			break;
+		case 2:
+			DBUtil::funcs::removeEndurium(m_id, actualAmount);
+			break;
+		case 3:
+			DBUtil::funcs::removeTerbium(m_id, actualAmount);
+			break;
+		case 11:
+			DBUtil::funcs::removePrometid(m_id, actualAmount);
+			break;
+		case 12:
+			DBUtil::funcs::removeDuranium(m_id, actualAmount);
+			break;
+		case 13:
+			DBUtil::funcs::removePromerium(m_id, actualAmount);
+			break;
+		default:
+			return; // OTHER ORE IDS ARE NOT IN RANGE OF SELLING
+		}
+		const double honorMultip = 1 + m_player.hon / 500000.0;
+		const double resourceMultiplier = boost::algorithm::clamp(honorMultip, 1.0, 2.0);
+		long long price = credits_t(g_oreinfo[oreid].getCreditPrice() * resourceMultiplier) * actualAmount;
+		long long cred = addCredits(price);
+
+		DBUtil::funcs::setCRD(m_id, cred);
+		sendPacket(m_sendpacket.receiveLoot("CRE", { price,cred }));
+		updateCargo();
+	}
+}
+
+pos_t CPlayerHandler::distanceTo(Position_t pos)
+{
+	Position_t mypos = m_mm->get_current_position();
+
+	pos_t dx = mypos.first - pos.first;
+	pos_t dy = mypos.second - pos.second;
+
+	return std::sqrt(dx * dx + dy * dy);
+}
+
+pos_t CPlayerHandler::distanceTo(id_t id)
+{
+	Position_t pos;
+	if (id < BEGIN_MOB_IDS)
+	{
+		handlePtr enemy = m_currentSession->getHandler(id);
+		if (enemy)
+			pos = enemy->getPos();
+		else
+			return std::numeric_limits<pos_t>::max();
+	}
+	else {
+		auto mob = m_currentSession->getMob(id);
+		if (mob)
+			pos = mob->getPosition();
+		else
+			return std::numeric_limits<pos_t>::max();
+	}
+	return distanceTo(pos);
 }
 
 void CPlayerHandler::updateHealth(damage_t dmg)
@@ -893,10 +988,35 @@ void CPlayerHandler::updateSpeed(speed_t speed)
 	m_mm->set_speed(speed);
 }
 
+void CPlayerHandler::updateCargo()
+{
+	refreshCargo();
+	sendPacket(m_sendpacket.updateOres(m_player.loot.o1_prometium, m_player.loot.o1_endurium, m_player.loot.o1_terbium,
+		m_player.loot.o4_xenomit,
+		m_player.loot.o2_prometid, m_player.loot.o2_duranium,
+		m_player.loot.o3_promerium));
+}
+
+void CPlayerHandler::refreshCargo()
+{
+	// IRRELEVANT ON "I" PACKET. THE REAL VALUE IS CALCULATED ON "E" PACKET
+	m_player.cargospace = DBUtil::funcs::getCargo(m_id);
+
+	m_player.loot.o1_prometium = DBUtil::funcs::getPrometium(m_id);
+	m_player.loot.o1_endurium = DBUtil::funcs::getEndurium(m_id);
+	m_player.loot.o1_terbium = DBUtil::funcs::getTerbium(m_id);
+	m_player.loot.o2_prometid = DBUtil::funcs::getPrometid(m_id);
+	m_player.loot.o2_duranium = DBUtil::funcs::getDuranium(m_id);
+	m_player.loot.o3_promerium = DBUtil::funcs::getPromerium(m_id);
+	m_player.loot.o4_xenomit = DBUtil::funcs::getXenomit(m_id);
+
+	m_player.cargospacemax = g_shipinfo[m_player.shipid].getCargo();
+}
+
 void CPlayerHandler::generateObjects(const map_t mapid) {
-	
+
 	auto ptr = g_allMaps.find(mapid);
-	if(ptr == g_allMaps.end())
+	if (ptr == g_allMaps.end())
 	{
 		return;
 	}
@@ -930,7 +1050,7 @@ void CPlayerHandler::generatePlayer() {
 			Position_t pos = std::make_pair(it.second->getX() + 410, it.second->getY() + 300);
 			bool invisible = it.second->m_pbIsInvisible;
 			rank_t rank = 0;
-			if (DBUtil::funcs::isAdmin(uid)) 
+			if (DBUtil::funcs::isAdmin(uid))
 			{
 				rank = 21;
 			}
@@ -941,12 +1061,12 @@ void CPlayerHandler::generatePlayer() {
 			std::string spawnstring = m_sendpacket.spawnEnemy(uid, shipID, 3, DBUtil::funcs::getUserClanTag(uid), DBUtil::funcs::getUsername(uid), pos.first, pos.second,
 				companyID, DBUtil::funcs::getUserClanId(uid), rank, false, 1, 4);
 			// there should be as short of a time between spawn and invisible
-			std::string invisstring = m_sendpacket.cloak(uid, true);	
+			std::string invisstring = m_sendpacket.cloak(uid, true);
 
-			
+
 			sendPacket(spawnstring);
 			sendPacket("0|n|d|" + boost::lexical_cast<std::string>(uid) + "|" + DBUtil::funcs::getDrones(uid));
-			if(invisible)
+			if (invisible)
 				sendPacket(invisstring);
 		}
 	}
@@ -955,7 +1075,7 @@ void CPlayerHandler::generatePlayer() {
 void CPlayerHandler::generateAliens() {
 
 	m_currentSession->lockMobsRead();
-	for(auto mob: m_currentSession->getMobs())
+	for (auto mob : m_currentSession->getMobs())
 	{
 		if (mob.second != nullptr)
 		{
@@ -978,7 +1098,7 @@ void CPlayerHandler::generateCollectables()
 	m_currentSession->unlockCollectablesRead();
 }
 void CPlayerHandler::generatePlayer(id_t id) {
-	try{
+	try {
 		auto& enemy = m_currentSession->getHandler(id);
 		if (enemy != nullptr)
 		{
@@ -1008,7 +1128,7 @@ void CPlayerHandler::generatePlayer(id_t id) {
 	}
 }
 void CPlayerHandler::checkForObjectsToInteract() {
-	
+
 
 	//for the sake of multiple read/writes these two for each loops have to create temporary new "Portals/Stations" instead of iterating through them.
 	auto portals = m_currentMap.getPortals();
@@ -1016,21 +1136,21 @@ void CPlayerHandler::checkForObjectsToInteract() {
 
 	m_bCloseToGate = std::any_of(portals.begin(), portals.end(), [&](const CPortal& p) {
 		return isInRangeCircle(CPortal::RANGE, p.x, p.y);
-	});
+		});
 	m_bCloseToStation = std::any_of(stations.begin(), stations.end(), [&](const CStation& s) {
 		return isInRangeSquare(CPortal::RANGE, s.x, s.y);
-	});
+		});
 
 	auto pos = m_mm->get_current_position();
 	m_bInRadiationzone = pos.first > m_currentMap.getWidth() || pos.first < 0 ||
 		pos.second > m_currentMap.getHeight() || pos.second < 0;
 	//TO-DO add other check, etc.
 
-	std::string packet = m_sendpacket.events(m_bCloseToGate && this->getShieldPreventTime() ? 1 : m_bCloseToStation ? 1: 0, m_bIsRepairing, m_bCloseToStation, m_bInRadiationzone, m_bCloseToGate, 0);
+	std::string packet = m_sendpacket.events(m_bCloseToGate && this->getShieldPreventTime() ? 1 : m_bCloseToStation ? 1 : 0, m_bIsRepairing, m_bCloseToStation, m_bInRadiationzone, m_bCloseToGate, 0);
 	sendPacket(packet);
 }
 bool CPlayerHandler::isInRangeCircle(int radius, pos_t objx, pos_t objy) {
-	
+
 	//must admit i couldnt really come up with this myself, guess this might be because its in the middle of the night right now, feel so ashamed :D
 	Position_t position(m_mm->get_current_position());
 	pos_t dx = std::abs(position.first - objx);
@@ -1039,11 +1159,11 @@ bool CPlayerHandler::isInRangeCircle(int radius, pos_t objx, pos_t objy) {
 	if (dy > radius) return false;
 	if (dx + dy <= radius) return true;
 	//slower check if nothing of that other stuff happens (compiler safety)
-	return (position.first - objx)*(position.first - objx) + (position.second - objy)*(position.second - objy) < radius*radius;
+	return (position.first - objx) * (position.first - objx) + (position.second - objy) * (position.second - objy) < radius * radius;
 }
 bool CPlayerHandler::isInRangeSquare(int radius, pos_t objx, pos_t objy)
 {
-	
+
 	Position_t position(m_mm->get_current_position());
 	if (position.first < objx - radius) {
 		return false;
@@ -1059,7 +1179,7 @@ bool CPlayerHandler::isInRangeSquare(int radius, pos_t objx, pos_t objy)
 	}
 	return true;
 }
-void CPlayerHandler::handle_read(const boost::system::error_code & ec, size_t bytes)
+void CPlayerHandler::handle_read(const boost::system::error_code& ec, size_t bytes)
 {
 	switch (ec.value()) {
 	case 0:
@@ -1100,6 +1220,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 		static int dbgvar = 13000;
 
 		boost::algorithm::split(m_splitpackets, m_information, boost::is_any_of("|"));
+
 		try { //try for bad_lexical_cast globally stopping packet check
 			if (m_bLoginSent == false)
 			{
@@ -1160,9 +1281,9 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						// NaN | NaN | NaN | NaN -> error in system, currently happening when you move to a position on the minimap where youre already heading (rarely, idk why exactly)
 						// Nan | Nan | 123 | 123 -> user logout, last position on 123|123
 						if (m_splitpackets.at(3).find("Infinity") != npos
-							|| m_splitpackets.at(3).find("NaN") != npos 
+							|| m_splitpackets.at(3).find("NaN") != npos
 							|| m_splitpackets.at(4).find("Infinity") != npos
-							|| m_splitpackets.at(4).find("NaN") != npos){
+							|| m_splitpackets.at(4).find("NaN") != npos) {
 							g_filewrite.writemore("User " + to_string(m_id) + " MOVE REQUEST BUG \"" + m_information + "\"", "Client"); //client error
 							disconnectUser();
 						}
@@ -1171,14 +1292,14 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							//TODO: Save pos to DB
 							savePosToDB();
 						}
-						
+
 					}
 				}
 				else if (packetIs(LOGOUT))
 				{
 					toggleLogoutCancel(false);
 					updateLogoutTime();
-					m_asyncThreads.push_back(async_func(&CPlayerHandler::logoutHandle));
+					async_func(&CPlayerHandler::logoutHandle);
 				}
 				else if (packetIs(COLLECT_BOX))
 				{
@@ -1211,9 +1332,9 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						bool levelIsReasonForNoJump = false;
 						auto portals = m_currentMap.getPortals();
 						auto myPortal = std::find_if(portals.begin(), portals.end(), [&](const CPortal& p)
-						{
-							return isInRangeCircle(500, p.x, p.y);
-						});
+							{
+								return isInRangeCircle(500, p.x, p.y);
+							});
 						if (myPortal != portals.end())
 						{
 							//PORTAL FOUND
@@ -1239,7 +1360,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 								//JUMPING!
 								m_pbIsJumping = true;
 								sendPacket("0|U|" + lexical_cast<std::string>(myPortal->destination_mapID) + "|" + lexical_cast<std::string>(myPortal->portalIDonMap));
-								m_asyncThreads.push_back(async_func(2000, &CPlayerHandler::jump, myPortal->destination_mapID, myPortal->destination_x, myPortal->destination_y));
+								async_func(2000, &CPlayerHandler::jump, myPortal->destination_mapID, myPortal->destination_x, myPortal->destination_y);
 
 							}
 						}
@@ -1252,7 +1373,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 				else if (packetIs(LASERSHOOT_START)) {
 					id_t uid = 0;
 					uid = lexical_cast<id_t>(m_splitpackets.at(1));
-					
+
 					attackID(uid);
 				}
 				else if (packetIs(ROCKETSHOOT)) {
@@ -1265,13 +1386,18 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						sendPacket("0|A|RCD");
 						sendMessagePacket("You can't attack a testing Unit!");
 					}
+					else if (distanceTo(uid) > g_rocketinfo[m_rockettype].getMaxDistance())
+					{
+						sendMessagePacket("Ship is too far away.");
+						sendPacket("0|A|RCD");
+					}
 					else
 					{
 						sendPacketAfter(2000, "0|A|RCD");
 
 						//player loses invisibility
 						uncloak();
-						
+
 						if (uid < BEGIN_MOB_IDS) // PLAYER
 						{
 							//PLAYER
@@ -1289,11 +1415,11 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 									bubbleMe = m_sendpacket.damageBubbleSelected(enemy->getHP(), enemy->getSHD(), damage, false);
 									sendEveryone(shoot);
 									sendPacket(bubbleMe);
-									if(dead) //enemy died
+									if (dead) //enemy died
 									{
 										enemy->die();
 									}
-									
+
 									updateRepairPrevent();
 									enemy->updateNAZPrevent();
 									updateLogoutTime();
@@ -1319,7 +1445,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 								damage = m_damageManager.damageRocket(uid, m_rockettype);
 								shoot = m_sendpacket.rocketAttack(m_id, uid, m_rockettype, damage); //if damage == 0 hit is false
 								bool dead = !makeDamage(damage, mob);
-								
+
 								bubbleMe = m_sendpacket.damageBubbleSelected(mob->getShip().hp, mob->getShip().shd, damage, false);
 								sendEveryone(shoot);
 								sendPacket(bubbleMe);
@@ -1345,7 +1471,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					//ELaserColor = color			lasertype_t = ammo
 					if (laserid > 5 || laserid < 1)
 					{
-						g_filewrite.writemore("USERID: " + lexical_cast<std::string>(m_id) + " ILLEGAL ACTVITY! USER CHOSE AMMO TYPE WHICH DOES NOT EXIST!","Illegal");
+						g_filewrite.writemore("USERID: " + lexical_cast<std::string>(m_id) + " ILLEGAL ACTVITY! USER CHOSE AMMO TYPE WHICH DOES NOT EXIST!", "Illegal");
 						cout << EColor::RED << "WARNING: " << m_id << " used illegal m_lasertype " << laserid << cendl;
 						laserid = boost::algorithm::clamp(laserid, 1, 5);
 					}
@@ -1362,7 +1488,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					rocketid = lexical_cast<rockettype_t>(m_splitpackets.at(1));
 					if (rocketid > 3 || rocketid < 1)
 					{
-						g_filewrite.writemore("USERID: " + lexical_cast<std::string>(m_id) + " ILLEGAL ACTVITY! USER CHOSE ROCKET TYPE WHICH DOES NOT EXIST!","Illegal");
+						g_filewrite.writemore("USERID: " + lexical_cast<std::string>(m_id) + " ILLEGAL ACTVITY! USER CHOSE ROCKET TYPE WHICH DOES NOT EXIST!", "Illegal");
 						cout << EColor::RED << "WARNING: " << m_id << " used illegal m_rockettype " << rocketid << cendl;
 						rocketid = boost::algorithm::clamp(rocketid, 1, 3);
 					}
@@ -1370,6 +1496,17 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 				}
 				else if (packetIs(LASERSHOOT_ABORT)) {
 					m_pbIsAttacking = false;
+				}
+				else if (packetIs(TRADEORE_SEND)) // sent,when arrived at station
+				{
+					this->onSpaceStationTradeRequest();
+				}
+				else if (packetIs(TRADEORE))
+				{
+					if (m_bCloseToStation /* || m_extras.hasHM7*/)
+						onTrade(lexical_cast<ore_t>(m_splitpackets.at(1)), lexical_cast<ore_t>(m_splitpackets.at(2)));
+					else
+						sendMessagePacket("You have to be near a company station to sell resources.");
 				}
 				else if (packetIs(SPECIAL))
 				{
@@ -1389,7 +1526,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							std::string userID_string = lexical_cast<std::string>(m_id);
 							sendEveryone("0|n|SMB|" + userID_string);
 
-							m_asyncThreads.push_back(async_func(10000, &CPlayerHandler::detonateSMB));
+							async_func(10000, &CPlayerHandler::detonateSMB);
 
 
 
@@ -1419,7 +1556,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							std::string userID_string = lexical_cast<std::string>(m_id);
 							sendEveryone("0|n|ISH|" + userID_string);
 							long long delta = ISH_CD_MS - 3000;
-							m_asyncThreads.push_back(async_func(3000, &CPlayerHandler::detonateISH, delta));
+							async_func(3000, &CPlayerHandler::detonateISH, delta);
 						}
 					}
 
@@ -1447,7 +1584,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					{
 						cloak();
 					}
-					else if (packetIsLevel(SPECIAL_CHANGECONFIG,1))
+					else if (packetIsLevel(SPECIAL_CHANGECONFIG, 1))
 					{
 						unsigned int toConfig = lexical_cast<unsigned int>(m_splitpackets.at(2));
 						handleConfigChange(toConfig);
@@ -1460,7 +1597,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						//aborterino attackerino
 						m_pbIsAttacking = false;
 					}
-					
+
 					auto previousTimeStamp = m_selectedTimeStamp;
 					selectOpponent(new_selectedOpponent);
 					id_t uid = m_selectedOpponent;
@@ -1498,9 +1635,9 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							sendPacket(selectedShowBars);
 						}
 					}
-					if ( (previousTimeStamp + 500 > m_selectedTimeStamp) && // 500 ms time span to trigger attack
-						 (m_previousSelectedOpponent == m_selectedOpponent) &&
-						 (m_pbIsAttacking == false) // actually already done inside the function but this keeps some assembly lines off if user just spams lmb
+					if ((previousTimeStamp + 500 > m_selectedTimeStamp) && // 500 ms time span to trigger attack
+						(m_previousSelectedOpponent == m_selectedOpponent) &&
+						(m_pbIsAttacking == false) // actually already done inside the function but this keeps some assembly lines off if user just spams lmb
 						)
 					{
 						attackID(m_selectedOpponent);
@@ -1514,7 +1651,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						{
 							//later check if mob is CLOSE to char instead of spawning all mobs global on map
 							std::shared_ptr<CMob> m = m_currentSession->getMob(init_id);
-							if(m)
+							if (m)
 								m->spawn(m_id); //send spawn packets
 						}
 						else
@@ -1530,7 +1667,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							{
 								dcout << "Can't i|" << init_id << "! Generate Player with ID not successfull: " << me.what() << cendl;
 							}
-							catch (std::exception& me) 
+							catch (std::exception& me)
 							{
 								dcout << "Can't i|" << init_id << "! Generate Player with ID not successfull: " << me.what() << cendl;
 							}
@@ -1547,11 +1684,52 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						sendMessagePacket("Currently no 2nd packet test ongoing. :)");
 					}
 					else if (packetIs("DBG_INTERRUPT_THREADS")) {
-						for (auto& thread : m_asyncThreads)
-						{
-							if(thread)
-								thread->interrupt();
+						m_workerThreads.stopAllThreads();
+					}
+					else if (packetIs("DBG_OREIDHERE")) {
+						const Position_t p = getPos();
+						static id_t oreID = 5000;
+						bool ub = false;
+						try {
+							ub = lexical_cast<int>(m_splitpackets.at(2));
 						}
+						catch (std::out_of_range oor)
+						{
+						}
+						std::string str = "Ore id: ";
+						str += to_string(oreID);
+						sendMessagePacket(str);
+						sendPacket(m_sendpacket.createOre(oreID++, lexical_cast<ore_t>(m_splitpackets.at(1)), p.first, p.second, ub));
+
+					}
+					else if (packetIs("DBG_BOXIDHERE")) {
+						const Position_t p = getPos();
+						static id_t oreID = 50000;
+						std::string str = "Box id: ";
+						str += to_string(oreID);
+						sendMessagePacket(str);
+						sendPacket(m_sendpacket.createLoot(oreID++, lexical_cast<ore_t>(m_splitpackets.at(1)), p.first, p.second));
+					}
+					else if (packetIs("DBG_SPAWNRESOURCE")) {
+						CMobWrapper::Loot loot{ 0 };
+						try {
+							loot.o1_prometium = lexical_cast<ore_t>(m_splitpackets.at(1));
+							loot.o1_endurium = lexical_cast<ore_t>(m_splitpackets.at(2));
+							loot.o1_terbium = lexical_cast<ore_t>(m_splitpackets.at(3));
+							loot.o2_prometid = lexical_cast<ore_t>(m_splitpackets.at(4));
+							loot.o2_duranium = lexical_cast<ore_t>(m_splitpackets.at(5));
+							loot.o3_promerium = lexical_cast<ore_t>(m_splitpackets.at(6));
+							loot.o4_xenomit = lexical_cast<ore_t>(m_splitpackets.at(7));
+						}
+						catch (const std::out_of_range& oor)
+						{
+
+						}
+						const Position_t pos = getPos();
+						//what? you want to use the emplace parameter instead of a double allocation? pfft bye
+						//std::shared_ptr<CResourceBox> res(new CResourceBox(loot,m_currentSession->generateNewCollectableId(),pos.first,pos.second,*m_currentSession,m_id));
+						//m_currentSession->addCollectable(res);
+
 					}
 					else if (packetIs("DBG_SHIP")) {
 						DBUtil::funcs::setShip(m_id, lexical_cast<shipid_t>(m_splitpackets.at(1)));
@@ -1620,7 +1798,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							warncout << "User " << m_id << " mysql_exception: " << me.what() << cendl;
 							disconnectUser();
 						}
-						if(w.credits_loot)
+						if (w.credits_loot)
 							sendPacket(m_sendpacket.receiveLoot("CRE", { w.credits_loot,w.credits_total }));
 						if (w.uri_loot)
 							sendPacket(m_sendpacket.receiveLoot("URI", { w.uri_loot,w.uri_total }));
@@ -1650,7 +1828,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						{
 							auto user = m_currentSession->getHandler(to);
 							if (user)
-							{								
+							{
 								sendEveryone(m_sendpacket.kill(to));
 
 								user->die();
@@ -1667,7 +1845,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							{
 								Position_t pos = mob->getPosition();
 								mob->move(pos.first + right, pos.second);
-								mob->generateRandomWaitingTime(10000, 10000);
+								mob->generateRandomWaitingTime(getTimeNow(), 10000, 10000);
 							}
 						}
 					}
@@ -1681,15 +1859,15 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							{
 								Position_t pos = mob->getPosition();
 								mob->move(pos.first, pos.second + down);
-								mob->generateRandomWaitingTime(10000, 10000);
+								mob->generateRandomWaitingTime(getTimeNow(), 10000, 10000);
 							}
 						}
 					}
 					else if (packetIs("DBG_VAR"))
 					{
 						std::string var = m_splitpackets.at(1);
-						/* Only 1 variable left right now 
-							
+						/* Only 1 variable left right now
+
 							implement std::map<std::string,valuetype> later if more values are added
 						*/
 						if (var == "AITickRate" || var == "tr")
@@ -1700,10 +1878,10 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					}
 					else if (packetIs("DBG_MOVE"))
 					{
-					/* 
-						UNSAFE METHOD! USE ONLY FOR DEBUGGING PURPOSE. IT CAN POTENTIALLY OVERRIDE
-						OTHER ORE IDS
-						*/
+						/*
+							UNSAFE METHOD! USE ONLY FOR DEBUGGING PURPOSE. IT CAN POTENTIALLY OVERRIDE
+							OTHER ORE IDS
+							*/
 						pos_t right = lexical_cast<pos_t>(m_splitpackets.at(1));
 						pos_t down = lexical_cast<pos_t>(m_splitpackets.at(2));
 						if (m_selectedOpponent >= BEGIN_MOB_IDS)
@@ -1713,11 +1891,11 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							{
 								Position_t pos = mob->getPosition();
 								mob->move(pos.first + right, pos.second + down);
-								mob->generateRandomWaitingTime(10000, 10000);
-								std::thread([&](std::shared_ptr<CMob> mob) { 
+								mob->generateRandomWaitingTime(getTimeNow(), 10000, 10000);
+								std::thread([&](std::shared_ptr<CMob> mob) {
 									int randomInt = random<int>();
 									Position_t mobPos = mob->getPosition();
-									while (sendPacket(m_sendpacket.createOre(randomInt++,3, mobPos.first, mobPos.second)) && sendPacket(m_sendpacket.removeOre(randomInt - 2)))
+									while (sendPacket(m_sendpacket.createOre(randomInt++, 3, mobPos.first, mobPos.second)) && sendPacket(m_sendpacket.removeOre(randomInt - 2)))
 									{
 										std::this_thread::sleep_for(std::chrono::milliseconds(33));
 										Position_t newpos = mob->getPosition();
@@ -1727,8 +1905,8 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 										}
 										mobPos = newpos;
 									}
-						
-								},mob).detach(); //lets not even talk about a floating thread
+
+									}, mob).detach(); //lets not even talk about a floating thread
 							}
 						}
 					}
@@ -1792,7 +1970,7 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 						catch (const boost::exception& e) { std::cerr << BOOST_CERR_OUTPUT(e) << std::endl; }
 
 
-						std::string spawnmobstring = m_sendpacket.spawnEnemy(mobID++, mob_shipID,0, "", mob_name, mob_x, mob_y, 0, 0, 0, false, 0, 0, false);
+						std::string spawnmobstring = m_sendpacket.spawnEnemy(mobID++, mob_shipID, 0, "", mob_name, mob_x, mob_y, 0, 0, 0, false, 0, 0, false);
 						dcout << spawnmobstring << cendl;
 						sendPacket(spawnmobstring);
 					}
@@ -1813,16 +1991,19 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 							mob->die();
 						}
 					}
-					else if (packetIs("DBG_UPDATE_MY_SPEED"))
+					else if (packetIs("DBG_SPEED"))
 					{
 						speed_t mynewspeed = lexical_cast<speed_t>(m_splitpackets.at(1));
 						updateSpeed(mynewspeed);
+						std::string msg = "Updated speed to ";
+						msg += mynewspeed;
+						sendMessagePacket(msg);
 					}
 					else if (packetIs("DBG_AI_FIRE"))
 					{
 						m_currentSession->lockMobsRead();
-						for(auto mobpair : m_currentSession->getMobs())
-						{	
+						for (auto mobpair : m_currentSession->getMobs())
+						{
 							std::shared_ptr<CMob>& mob = mobpair.second;
 							if (mob)
 							{
@@ -1830,10 +2011,10 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 								try {
 									id = lexical_cast<id_t>(m_splitpackets.at(1));
 								}
-								catch (std::out_of_range& ex) {	}
+								catch (const std::out_of_range& ex) {}
 								mob->attack(id);
 								handlePtr user = m_currentSession->getHandler(id);
-								if(user != nullptr)
+								if (user != nullptr)
 									user->receiveDamagePure(mob->getShip().dmg);
 								mob->abort();
 							}
@@ -1842,12 +2023,17 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					}
 					else if (packetIs("DBG_HESOYAM"))
 					{
-						m_player.hp = m_player.maxhp*2; //YEAH BOI NANO HP
+						m_player.hp = m_player.maxhp * 2; //YEAH BOI NANO HP
 						m_player.shd = m_player.maxshd;
 						m_player.basedamage = 50000;
 						sendPacket(m_sendpacket.updateHP(m_player.hp, m_player.maxhp));
 						sendPacket(m_sendpacket.updateSHD(m_player.shd, m_player.maxshd));
-
+						sendMessagePacket("HESOYAM");
+					}
+					else if (packetIs("DBG_DAMAGE"))
+					{
+						m_player.basedamage = lexical_cast<id_t>(m_splitpackets.at(1));
+						sendMessagePacket("Set damage!");
 					}
 					/*
 					else if (packetIs("DBG_AI_M2"))
@@ -1857,8 +2043,8 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					else if (packetIs("DBG_AI_MAGNET"))
 					{
 						const int distance = 250;
-
-						for(auto mobpair : m_currentSession->getMobs())
+						auto timeNow = getTimeNow();
+						for (auto mobpair : m_currentSession->getMobs())
 						{
 							std::shared_ptr<CMob>& mob = mobpair.second;
 							if (mob)
@@ -1866,13 +2052,13 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 								unsigned int deg = random<uint32_t>(360);
 								auto pos = mob->getPosition();
 								auto mypos = m_mm->get_current_position();
-								decltype(pos) newmobpos = std::make_pair(mypos.first,mypos.second);
+								decltype(pos) newmobpos = std::make_pair(mypos.first, mypos.second);
 								//x
 								double degree = deg * M_PI / 180.0;
 								newmobpos.first += distance * std::cos(degree);
 								newmobpos.second += distance * std::sin(degree);
-								mob->move(newmobpos.first,newmobpos.second);
-								mob->generateRandomWaitingTime(10000, 50000);
+								mob->move(newmobpos.first, newmobpos.second);
+								mob->generateRandomWaitingTime(timeNow, 10000, 50000);
 							}
 						}
 
@@ -1906,13 +2092,19 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 			dcout << "[EXCEPTION] Bad lexical cast in packet \"" << m_information << "\"" << cendl;
 #endif
 		}
+
 	}//END OF IF BYTES > 0
 	readData();
 }
 
+void CPlayerHandler::onSpaceStationTradeRequest()
+{
+	dcout << "SPACE STATION I NEED THE PRICES" << cendl;
+}
+
 void CPlayerHandler::savePosToDB()
 {
-	
+
 }
 
 void CPlayerHandler::sendMessagePacket(const std::string& text)
@@ -1925,7 +2117,7 @@ void CPlayerHandler::sendEveryone(const std::string& packet) {
 	m_currentSession->sendEveryone(packet);
 }
 
-void CPlayerHandler::sendEveryoneButMe(const std::string & packet)
+void CPlayerHandler::sendEveryoneButMe(const std::string& packet)
 {
 	//or session id? both work, 
 	// session id is securer and safer, 
@@ -2015,7 +2207,7 @@ damage_t CPlayerHandler::receiveDamageSHD(damage_t dmg) {
 
 void CPlayerHandler::die()
 {
- 	try {
+	try {
 		sendEveryone(m_sendpacket.kill(m_id));
 		map_t respawnMap = 1;
 		switch (m_player.fractionid)
@@ -2049,7 +2241,9 @@ void CPlayerHandler::die()
 //should happen at least at the end of a users time u know this joins and stuff
 void CPlayerHandler::suspendThreads()
 {
-	for (auto& thread : m_asyncThreads)
+	m_workerThreads.stopAllThreads();
+
+	/*for (auto& thread : m_asyncThreads)
 	{
 #define noSUSPEND_ASYNC_THREAD
 #ifdef SUSPEND_ASYNC_THREAD
@@ -2067,12 +2261,12 @@ void CPlayerHandler::suspendThreads()
 		delete thread;
 		thread = nullptr;
 	}
-	m_asyncThreads.clear();
+	m_asyncThreads.clear();*/
 	// hm
 	// m_socket.close();
 }
 void CPlayerHandler::fixPacket() {
-	
+
 	try {
 		boost::trim_if(m_information, [](char c) { return c == 0x0; });
 		boost::trim(m_information); // better, lol
@@ -2121,20 +2315,25 @@ health_t CPlayerHandler::addHP(health_t hp)
 }
 
 template<class callable, class ...arguments>
-boost::thread* CPlayerHandler::async_func(callable && func, arguments&&... args)
-{
-	boost::thread* thread_handle = new boost::thread(func, shared_from_this(), args...);
-	//thread_handle->detach();
-	return thread_handle;
-}
-template<class callable, class ...arguments>
-boost::thread* CPlayerHandler::async_func(int ms,callable && func, arguments&&... args)
+boost::thread* CPlayerHandler::async_func(callable&& func, arguments&& ... args)
 {
 	auto f = boost::bind(func, shared_from_this(), args...);
-	boost::thread* thread_handle = new boost::thread([f,ms]() {
+	m_workerThreads.add(f);
+
+	return nullptr;
+}
+template<class callable, class ...arguments>
+boost::thread* CPlayerHandler::async_func(int ms, callable&& func, arguments&& ... args)
+{
+	auto f = boost::bind(func, shared_from_this(), args...);
+	auto lambda = [f, ms]() {
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(ms));
 		f();
-	});
-	//thread_handle->detach();
+	};
+	m_workerThreads.add(lambda);
+	boost::thread* thread_handle = nullptr;/* new boost::thread([f, ms]() {
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(ms));
+		f();
+	});*/
 	return thread_handle;
 }

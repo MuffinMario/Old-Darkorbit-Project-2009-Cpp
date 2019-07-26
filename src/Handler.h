@@ -94,6 +94,9 @@ public:
 	hon_t		getHonor() const { return m_player.hon; }
 	level_t		getLevel() const { return m_player.lvl; }
 	factionid_t	getFaction() const { return m_player.fractionid; }
+	cargo_t		getCargo() const { return m_player.cargospace; }
+	cargo_t		getMaxCargo() const { return m_player.cargospacemax; }
+	cargo_t		getCargoSpaceLeft() const { return m_player.cargospacemax - m_player.cargospace; }
 	health_t	getRepBotHPRegen() const { return 10000; } /* TODO <- ADD VARIETY!!!!!*/
 
 	virtual shield_t addSHD(shield_t shd) = 0;
@@ -107,15 +110,51 @@ public:
 			onEPChange();
 		return m_player.exp; 
 	}
-	hon_t		addHonor(hon_t h) { return (m_player.hon += h); }
+	hon_t		addHonor(hon_t h) { 
+		setResourcePrices();//update resource prices on honor gain (or lose)
+		return (m_player.hon += h); 
+	}
 	level_t		addLevel(level_t l) { return (m_player.lvl += l); }
 
 	credits_t	reduceCredits(credits_t c) { return (m_player.cred -= c); }
 	uri_t		reduceUri(uri_t u) { return (m_player.uri -= u); }
 	exp_t		reduceEP(exp_t e) { return (m_player.exp -= e); }
-	hon_t		reduceHonor(hon_t h) { return (m_player.hon -= h); }
+	hon_t		reduceHonor(hon_t h) {
+		setResourcePrices();//update resource prices on honor gain (or lose)
+		return (m_player.hon -= h); 
+	}
 	level_t		reduceLevel(level_t l) { return (m_player.lvl -= l); }
-
+	/* OTHER THAN THE OTHER REDUCE FUNCTIONS, THIS RETURNS THE ACTUAL REDUCED AMOUNT */
+	ore_t		reduceOre(ore_t oreid, ore_t amount) {
+		refreshCargo();
+		ore_t left = 0;
+		ore_t pre = 0;
+		switch (oreid)
+		{
+		case 1:
+			left = m_player.loot.o1_prometium = std::max(0, (pre = m_player.loot.o1_prometium) - amount);
+			break;
+		case 2:
+			left = m_player.loot.o1_endurium = std::max(0, (pre = m_player.loot.o1_endurium) - amount);
+			break;
+		case 3:
+			left = m_player.loot.o1_terbium = std::max(0, (pre = m_player.loot.o1_terbium) - amount);
+			break;
+		case 11:
+			left = m_player.loot.o2_prometid = std::max(0, (pre = m_player.loot.o2_prometid) - amount);
+			break;
+		case 12:
+			left = m_player.loot.o2_duranium = std::max(0, (pre = m_player.loot.o2_duranium) - amount);
+			break;
+		case 13:
+			left = m_player.loot.o3_promerium = std::max(0, (pre = m_player.loot.o3_promerium) - amount);
+			break;
+		}
+		auto delta = pre - left;
+		m_player.cargospace -= delta;
+		return delta;
+	}
+	virtual void setResourcePrices() = 0;
 	void updateRepairPrevent() { m_last_repair_prevention = getTimeNow(); m_bIsRepairing = false; }
 	void updateShieldPrevent() { m_last_shield_prevention = getTimeNow(); }
 	void updateNAZPrevent() { m_last_naz_prevention = getTimeNow(); }
@@ -131,6 +170,11 @@ public:
 	virtual void updateHealth(damage_t dmg) = 0;
 	virtual void updateShield(damage_t dmg) = 0;
 	virtual void updateHitpoints(damage_t dmg) = 0;
+	virtual void updateSpeed(speed_t speed) = 0;
+	//refresh + update packet
+	virtual void updateCargo() = 0;
+	//refresh values
+	virtual void refreshCargo() = 0;
 
 	virtual void checkForObjectsToInteract() = 0;
 

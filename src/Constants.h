@@ -64,7 +64,7 @@ namespace Constants {
 		const std::string LOGOUT					= "l";
 		const std::string LOGOUT_CANCEL				= "o";
 		const std::string JUMP						= "j";
-		const std::string TRADEORE_MSG				= "T|X";
+		const std::string TRADEORE					= "T";
 		const std::string PING						= "PNG";
 		const std::string LOGIN_REQUEST				= "LOGIN";
 		const std::string QUEST_REMOVEPRIVILEGE		= "9|p";
@@ -113,6 +113,7 @@ namespace Constants {
 		const std::string MSG_CHANGEROCKET			= "W|R";
 		const std::string MSG_CHANGELASER			= "W|L";
 		const std::string ABORTATTACK				= "G";
+		const std::string STATION_SETPRICES			= "g";
 		const std::string QUEST						= "Q|"; // working around here, might not be possible as an empty string
 		const std::string QUEST_DONE				= "Q|DONE";
 		const std::string QUEST_CANCEL				= "Q|CANCEL";

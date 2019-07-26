@@ -337,7 +337,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_PolicyServer|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -393,7 +393,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AsyncThread.h" />
     <ClInclude Include="BonusBox.h" />
     <ClInclude Include="Collectable.h" />
     <ClInclude Include="Color.h" />
@@ -406,6 +405,9 @@
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="FileWriter.h" />
     <ClInclude Include="Handler.h" />
+    <ClInclude Include="OreInfo.h" />
+    <ClInclude Include="RocketInfo.h" />
+    <ClInclude Include="ThreadSafeHashTable.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Mob.h" />
     <ClInclude Include="MobWrapper.h" />
@@ -429,6 +431,7 @@
     <ClInclude Include="ShipInfo.h" />
     <ClInclude Include="Station.h" />
     <ClInclude Include="UsersDB.h" />
+    <ClInclude Include="WorkerThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BonusBox.cpp" />
@@ -456,6 +459,7 @@
     <ClCompile Include="ResourceBox.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SessionsManager.cpp" />
+    <ClCompile Include="WorkerThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Defines.tpp" />

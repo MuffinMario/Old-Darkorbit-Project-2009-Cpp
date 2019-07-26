@@ -93,20 +93,20 @@ void CMob::spawn()
 
 }
 
-void CMob::generateRandomWaitingTime(long long min, long long max)
+void CMob::generateRandomWaitingTime(long long timeNow, long long min, long long max)
 {
 	long long generated = random<long long>(min, max);
-	m_waitForNextMoveTime = getTimeNow() + generated + m_mm.get_time_for_destination();
+	m_waitForNextMoveTime = timeNow + generated + m_mm.get_time_for_destination();
 }
 
-void CMob::setRealWaitingTime(long long val)
+void CMob::setRealWaitingTime(long long timeNow, long long val)
 {
-	m_waitForNextMoveTime = getTimeNow() + val;
+	m_waitForNextMoveTime = timeNow + val;
 }
 
-inline void CMob::generateRandomWaitingTime(long long max)
+inline void CMob::generateRandomWaitingTime(long long timeNow,long long max)
 {
-	generateRandomWaitingTime(0, max);
+	generateRandomWaitingTime(timeNow, 0, max);
 }
 
 
@@ -190,8 +190,9 @@ damage_t CMob::receiveDamagePure(damage_t dmg, id_t from)
 	handleWhoAmIGonnaShoot(dmg, from);
 	if (from == m_belongToId && from != 0)
 	{
-		setLastTimeShotByBelongedPlayer(getTimeNow());
+		updateLastTimeShotByBelongedPlayer();
 	}
+	updateLastTimeShot();
 
 	constexpr const double SHIELDPERCENTAGE = 0.5;
 	/* Damage split between shield and HP */
@@ -353,6 +354,16 @@ damage_t CMob::receiveDamageSHD(damage_t dmg, id_t from)
 	}
 
 	return realdmg;
+}
+
+void CMob::increaseSHD(shield_t shd)
+{
+	m_ship.shd = std::min(m_ship.shd + shd, m_ship.shdmax);
+}
+
+void CMob::increaseHP(health_t hp)
+{
+	m_ship.hp = std::min(m_ship.hp + hp, m_ship.hpmax);
 }
 
 CMobWrapper CMob::getMobInfoFromDB(shipid_t alienship_id)

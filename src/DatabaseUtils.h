@@ -33,7 +33,17 @@ namespace DBUtil {
 		shield_t		getmaxSHD(id_t id);
 		speed_t			getSpeed(id_t id);
 		level_t			getLevel(id_t id);
+
+		cargo_t			getPrometium(id_t id);
+		cargo_t			getEndurium(id_t id);
+		cargo_t			getTerbium(id_t id);
+		cargo_t			getPrometid(id_t id);
+		cargo_t			getDuranium(id_t id);
+		cargo_t			getPromerium(id_t id);
+		cargo_t			getXenomit(id_t id);
+
 		cargo_t			getCargo(id_t id);
+
 		exp_t			getEXP(id_t id);
 		hon_t			getHON(id_t id);
 		credits_t		getCRD(id_t id);
@@ -67,7 +77,14 @@ namespace DBUtil {
 		void			setJP(id_t id,jackpot_t jackp);
 		void			setDrones(id_t id,std::string drone_str);
 		void			setUserClanId(id_t id,clanid_t clanid);
-	
+
+		void			removePrometium(id_t id, ore_t amount);
+		void			removeEndurium(id_t id, ore_t amount);
+		void			removeTerbium(id_t id, ore_t amount);
+		void			removePrometid(id_t id, ore_t amount);
+		void			removeDuranium(id_t id, ore_t amount);
+		void			removePromerium(id_t id, ore_t amount);
+		void			removeXenomit(id_t id, ore_t amount);
 
 	}
 }

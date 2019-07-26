@@ -1,6 +1,9 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include <string>
+//TODO: REVAMP WHEN NEW DB
+
+
 
 /*unused
 struct Player {
@@ -21,6 +24,7 @@ bool hasInstashieldCpu, level_t mineBoostCpuLevel, level_t aimCpuLevel, bool has
 bool hasCloakCpu);
 
 */
+
 struct CItems
 {
 	level_t m_droneRepairCpuLevel;
@@ -49,6 +53,15 @@ struct CConfig
 };
 class CPlayerInfo {
 public:
+	struct Loot {
+		ore_t o1_prometium;
+		ore_t o1_endurium;
+		ore_t o1_terbium;
+		ore_t o2_prometid;
+		ore_t o2_duranium;
+		ore_t o3_promerium;
+		ore_t o4_xenomit;
+	} loot;
 	CItems			items;
 	bool			isadmin;
 	shipid_t		shipid;

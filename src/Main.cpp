@@ -33,6 +33,8 @@ extern std::map<level_t, exp_t> g_droneLevelTable;
 extern CDBGetter g_database_get;
 extern CDBUpdater g_database_update;
 extern std::map<shipid_t, CShipInfo> g_shipinfo;
+extern std::map<rockettype_t, CRocketInfo> g_rocketinfo;
+extern std::map<ore_t, COreInfo> g_oreinfo;
 extern CSessionsManager g_sessionsManager;
 
 namespace {
@@ -138,6 +140,29 @@ namespace {
 			si.setBaseRockets(g_database_get.getUInt64());
 			return si;
 		};
+		auto initRocketInfo = [](rockettype_t rid) {
+			CRocketInfo ri;
+
+			ri.setType(rid);
+			g_database_get.changeQuery("rocketname", "rockets", "rocketid", rid);
+			ri.setName(g_database_get.getString());
+			g_database_get.changeQuery("rocketdamage", "rockets", "rocketid", rid);
+			ri.setDamage(g_database_get.getUInt64());
+			g_database_get.changeQuery("rocketdistance", "rockets", "rocketid", rid);
+			ri.setMaxDistance(g_database_get.getUInt64());
+			return ri;
+		};
+		auto initOreInfo = [](ore_t oid) {
+			COreInfo oi;
+
+			oi.setOreType(oid);
+			g_database_get.changeQuery("oreprice", "ores", "oreid", oid);
+			oi.setCreditPrice(g_database_get.getInt());
+			return oi;
+		};
+
+
+
 		for (shipid_t sid = 1; sid <= 10; sid++)
 		{
 			g_shipinfo[sid] = initShipInfo(sid);
@@ -145,6 +170,22 @@ namespace {
 		g_shipinfo[50] = initShipInfo(50);
 		g_shipinfo[52] = initShipInfo(52);
 		g_shipinfo[53] = initShipInfo(53);
+
+		//TODO: WIZ
+		for (rockettype_t rid = 1; rid <= 3; rid++)
+		{
+			g_rocketinfo[rid] = initRocketInfo(rid);
+		}
+
+
+		for (ore_t oid = 1; oid <= 3; oid++)
+		{
+			g_oreinfo[oid] = initOreInfo(oid);
+		}
+		for (shipid_t oid = 11; oid <= 13; oid++)
+		{
+			g_oreinfo[oid] = initOreInfo(oid);
+		}
 
 		cout << "All variables initiated!" << std::endl;
 	}

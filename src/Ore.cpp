@@ -20,6 +20,7 @@ void COre::rewardPlayer(id_t playerid)
 		g_database_update.queryUpdateRaw(
 			query
 		);
+		user->updateCargo();
 	}
 	catch(const mysql_exception& me)
 	{

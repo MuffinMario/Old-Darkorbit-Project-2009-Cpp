@@ -34,8 +34,8 @@ private:
 	NpcContainer_t m_NPCs;
 	Collectables_t m_collectables;
 
-	id_t m_highestMobId = 0LL;
-	id_t m_highestCollectableId = 0LL;
+	std::atomic<id_t> m_highestMobId = 0LL;
+	std::atomic<id_t> m_highestCollectableId = 0LL;
 	//returns true if a client (user id) is already connected to the server
 	bool				containsUserId(id_t sessionId);
 public:

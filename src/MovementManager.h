@@ -2,6 +2,7 @@
 #define MovementManager_H
 #include <chrono>
 #include <iostream>
+#include <atomic>
 #include <cmath>
 #include "Defines.h"
 
@@ -38,9 +39,9 @@ class CMovementManager {
 	
 	Position_t	local_pos;
 	Position_t	planned_pos;
-	speed_t		speed;
-	duration_t	time_last_call;
-	duration_t	time_for_destination;
+	std::atomic<speed_t>		speed;
+	std::atomic<duration_t>	time_last_call;
+	std::atomic<duration_t>	time_for_destination;
 
 	//for move and time getter
 	double		tmpz;

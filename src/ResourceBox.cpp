@@ -10,8 +10,22 @@ void CResourceBox::rewardPlayer(id_t playerid)
 	std::string prefix = "UPDATE cuentas SET ";
 	std::string content = "";
 	std::string suffix = "WHERE id = " + to_string(playerid);
-	auto appendStringIfLootAboveZero = [](std::string& s, const char* colname, ore_t oreAmount)
+	cargo_t cargoLeftOnPlayer = player->getCargoSpaceLeft();
+	bool notEnoughSpace = false;
+	const auto appendStringIfLootAboveZero = [&cargoLeftOnPlayer,&notEnoughSpace](std::string& s, const char* colname, ore_t& ore)
 	{
+		ore_t oreAmount = ore;
+		if (strcmp(colname, "xenomit") != 0) // xenomit is the only exception of not taking any space 
+		{
+			if (notEnoughSpace) return s;
+
+			if (cargoLeftOnPlayer - oreAmount < 0) {
+				notEnoughSpace = true;
+				oreAmount = cargoLeftOnPlayer; // amount received is inventory left
+			}
+			cargoLeftOnPlayer -= oreAmount;
+		}
+		ore -= oreAmount;
 		if (oreAmount > 0)
 		{
 			std::string col = colname;
@@ -24,6 +38,8 @@ void CResourceBox::rewardPlayer(id_t playerid)
 			return s;
 		}
 	};
+	auto originalLoot = m_lootOres;
+	CMobWrapper::Loot deltaLoot{ 0 };
 	content = appendStringIfLootAboveZero(content, "promerium", m_lootOres.o3_promerium);
 	content = appendStringIfLootAboveZero(content, "duranium", m_lootOres.o2_duranium);
 	content = appendStringIfLootAboveZero(content, "prometid", m_lootOres.o2_prometid);
@@ -31,7 +47,16 @@ void CResourceBox::rewardPlayer(id_t playerid)
 	content = appendStringIfLootAboveZero(content, "terbium", m_lootOres.o1_terbium);
 	content = appendStringIfLootAboveZero(content, "endurium", m_lootOres.o1_endurium);
 	content = appendStringIfLootAboveZero(content, "prometium", m_lootOres.o1_prometium);
+	std::cout << "endurium left: " << m_lootOres.o1_endurium << cendl;
 
+	deltaLoot.o1_prometium = originalLoot.o1_prometium - m_lootOres.o1_prometium;
+	deltaLoot.o1_endurium = originalLoot.o1_endurium - m_lootOres.o1_endurium;
+	deltaLoot.o1_terbium = originalLoot.o1_terbium - m_lootOres.o1_terbium;
+
+	deltaLoot.o2_prometid = originalLoot.o2_prometid - m_lootOres.o2_prometid;
+	deltaLoot.o2_duranium = originalLoot.o2_duranium - m_lootOres.o2_duranium;
+
+	deltaLoot.o3_promerium = originalLoot.o3_promerium - m_lootOres.o3_promerium;
 	/* user actually gets something */
 	if (content != "")
 	{
@@ -43,12 +68,15 @@ void CResourceBox::rewardPlayer(id_t playerid)
 		);
 		/* Send user receive message */
 		player->sendPacket(m_pm.receiveLoot("CAR", {
-			(long long)m_lootOres.o1_prometium, (long long)m_lootOres.o1_endurium, (long long)m_lootOres.o1_terbium
-			, (long long)m_lootOres.o4_xenomit
-			, (long long)m_lootOres.o2_prometid , (long long)m_lootOres.o2_duranium
-			, (long long)m_lootOres.o3_promerium }));
+			(long long)deltaLoot.o1_prometium, (long long)deltaLoot.o1_endurium, (long long)deltaLoot.o1_terbium
+			, (long long)deltaLoot.o4_xenomit
+			, (long long)deltaLoot.o2_prometid , (long long)deltaLoot.o2_duranium
+			, (long long)deltaLoot.o3_promerium }));
 		/* TODO: Update cargo with 0|E */
+		player->updateCargo();
 	}
+	if (notEnoughSpace)
+		player->sendPacket("0|y|BTB"); // I guess BOX TOO BIG is appropriate
 	if (boxIsPrivate() && m_belongsTo != playerid)
 	{
 		hon_t minusHon = 100;
@@ -166,13 +194,28 @@ void CResourceBox::collect(id_t playerid)
 		rewardPlayer(playerid);
 
 		// Remove from session
-		remove();
+		if(empty())
+			remove();
 	}
 	else
 	{
 		/* USER IS NOT IN CORRECT OFFSET TO BONUS BOX */
 		g_filewrite.writemore("User " + to_string(m_id) + " is " + to_string(std::make_pair(player->getX(), player->getY())) + " and box is " + to_string(m_pos) + ".", "RBox");
 	}
+}
+
+bool CResourceBox::empty()
+{
+	return m_lootOres.o1_prometium <= 0 &&
+		m_lootOres.o1_endurium <= 0 &&
+		m_lootOres.o1_terbium <= 0 &&
+		
+		m_lootOres.o2_prometid <= 0 &&
+		m_lootOres.o2_duranium <= 0 &&
+		
+		m_lootOres.o3_promerium <= 0 &&
+		
+		m_lootOres.o4_xenomit <= 0;
 }
 
 

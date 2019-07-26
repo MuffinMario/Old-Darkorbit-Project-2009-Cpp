@@ -159,11 +159,70 @@ level_t DBUtil::funcs::getLevel(id_t id)
 	return g_database_get.getUInt();
 }
 
+cargo_t DBUtil::funcs::getPrometium(id_t id)
+{
+	std::lock_guard<std::mutex> lock(database_mutex);
+	g_database_get.changeQuery("prometium", "cuentas", "id", id);
+	return g_database_get.getUInt();
+}
+cargo_t DBUtil::funcs::getEndurium(id_t id)
+{
+	std::lock_guard<std::mutex> lock(database_mutex);
+	g_database_get.changeQuery("endurium", "cuentas", "id", id);
+	return g_database_get.getUInt();
+}
+cargo_t DBUtil::funcs::getTerbium(id_t id)
+{
+	std::lock_guard<std::mutex> lock(database_mutex);
+	g_database_get.changeQuery("terbium", "cuentas", "id", id);
+	return g_database_get.getUInt();
+}
+
+cargo_t DBUtil::funcs::getPrometid(id_t id)
+{
+	std::lock_guard<std::mutex> lock(database_mutex);
+	g_database_get.changeQuery("prometid", "cuentas", "id", id);
+	return g_database_get.getUInt();
+}
+cargo_t DBUtil::funcs::getDuranium(id_t id)
+{
+	std::lock_guard<std::mutex> lock(database_mutex);
+	g_database_get.changeQuery("duranium", "cuentas", "id", id);
+	return g_database_get.getUInt();
+}
+
+cargo_t DBUtil::funcs::getPromerium(id_t id)
+{
+	std::lock_guard<std::mutex> lock(database_mutex);
+	g_database_get.changeQuery("promerium", "cuentas", "id", id);
+	return g_database_get.getUInt();
+}
+cargo_t DBUtil::funcs::getXenomit(id_t id)
+{
+	std::lock_guard<std::mutex> lock(database_mutex);
+	g_database_get.changeQuery("xenomit", "cuentas", "id", id);
+	return g_database_get.getUInt();
+}
+
+
 cargo_t DBUtil::funcs::getCargo(id_t id)
 {
 	std::lock_guard<std::mutex> lock(database_mutex);
-	g_database_get.changeQuery("carga", "cuentas", "id", id);
-	return g_database_get.getUInt();
+	cargo_t cargo = 0;
+	g_database_get.changeQuery("prometium", "cuentas", "id", id);
+	cargo += g_database_get.getUInt();
+	g_database_get.changeQuery("endurium", "cuentas", "id", id);
+	cargo += g_database_get.getUInt();
+	g_database_get.changeQuery("terbium", "cuentas", "id", id);
+	cargo += g_database_get.getUInt();
+	g_database_get.changeQuery("prometid", "cuentas", "id", id);
+	cargo += g_database_get.getUInt();
+	g_database_get.changeQuery("duranium", "cuentas", "id", id);
+	cargo += g_database_get.getUInt();
+	g_database_get.changeQuery("promerium", "cuentas", "id", id);
+	cargo += g_database_get.getUInt();
+
+	return cargo;
 }
 
 exp_t DBUtil::funcs::getEXP(id_t id)
@@ -368,4 +427,55 @@ void DBUtil::funcs::setDrones(id_t id, std::string drone_str)
 void DBUtil::funcs::setUserClanId(id_t id, clanid_t clanid)
 {
 	DEFAULT_SET_TEMPLATE_NORMAL("clan", "cuentas", "id", clanid)
+}
+
+
+#define DEFAULT_REDUCE_TEMPLATE_NORMAL(row_name,table_name,id_string,param,amount)\
+									std::string str = "UPDATE ";\
+									str += table_name;\
+									str += " SET ";\
+									str += row_name;\
+									str += " = ";\
+									str += row_name;\
+									str += " - "; \
+									str += to_string(amount);\
+									str += " WHERE ";\
+									str += id_string;\
+									str += " = ";\
+									str += to_string(param);\
+									g_database_update.queryUpdateRaw(str);
+
+void DBUtil::funcs::removePrometium(id_t id, ore_t amount)
+{
+	DEFAULT_REDUCE_TEMPLATE_NORMAL("prometium", "cuentas", "id", id, amount);
+}
+
+void DBUtil::funcs::removeEndurium(id_t id, ore_t amount)
+{
+	DEFAULT_REDUCE_TEMPLATE_NORMAL("endurium", "cuentas", "id", id, amount);
+}
+
+void DBUtil::funcs::removeTerbium(id_t id, ore_t amount)
+{
+	DEFAULT_REDUCE_TEMPLATE_NORMAL("terbium", "cuentas", "id", id, amount);
+}
+
+void DBUtil::funcs::removePrometid(id_t id, ore_t amount)
+{
+	DEFAULT_REDUCE_TEMPLATE_NORMAL("prometid", "cuentas", "id", id, amount);
+}
+
+void DBUtil::funcs::removeDuranium(id_t id, ore_t amount)
+{
+	DEFAULT_REDUCE_TEMPLATE_NORMAL("duranium", "cuentas", "id", id, amount);
+}
+
+void DBUtil::funcs::removePromerium(id_t id, ore_t amount)
+{
+	DEFAULT_REDUCE_TEMPLATE_NORMAL("promerium", "cuentas", "id", id, amount);
+}
+
+void DBUtil::funcs::removeXenomit(id_t id, ore_t amount)
+{
+	DEFAULT_REDUCE_TEMPLATE_NORMAL("xenomit", "cuentas", "id", id, amount);
 }

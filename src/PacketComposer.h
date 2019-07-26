@@ -68,7 +68,9 @@ public:
 	static std::string buyRockets(rockettype_t type, size_t amount); // ^
 
 															//maybe set this to userID specific
-	static std::string setOrePrices(); // 10,15,25,200,200,500 on default
+	static std::string setOrePrices(credits_t prometium, credits_t endurium, credits_t terbium, 
+		credits_t prometid, credits_t duranium, 
+		credits_t promerium); // 10,15,25,200,200,500 on default
 	static std::string setRocketPrices();
 	static std::string setAmmoPrices();
 

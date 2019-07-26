@@ -73,6 +73,12 @@
     <Filter Include="Quelldateien\Utils">
       <UniqueIdentifier>{0930ad0c-2ee4-4e38-8625-7a78d92071e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headerdateien\Utils\Container">
+      <UniqueIdentifier>{b868ba29-2e8c-43ae-a6e2-29f09bfe7107}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Utils\Threading">
+      <UniqueIdentifier>{3a36c44f-b047-4fc2-8f70-bfa630f31962}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Defines.h">
@@ -122,9 +128,6 @@
     </ClInclude>
     <ClInclude Include="MovementManager.h">
       <Filter>Headerdateien\Server\Movement</Filter>
-    </ClInclude>
-    <ClInclude Include="AsyncThread.h">
-      <Filter>Headerdateien\Utils</Filter>
     </ClInclude>
     <ClInclude Include="GameServer.h">
       <Filter>Headerdateien\Server</Filter>
@@ -182,6 +185,18 @@
     </ClInclude>
     <ClInclude Include="Inventory.h">
       <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkerThreadPool.h">
+      <Filter>Headerdateien\Utils\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadSafeHashTable.h">
+      <Filter>Headerdateien\Utils\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="RocketInfo.h">
+      <Filter>Headerdateien\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="OreInfo.h">
+      <Filter>Headerdateien\Database</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -259,6 +274,9 @@
     </ClCompile>
     <ClCompile Include="Defines.cpp">
       <Filter>Quelldateien\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkerThreadPool.cpp">
+      <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

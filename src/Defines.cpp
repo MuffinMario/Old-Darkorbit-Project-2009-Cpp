@@ -16,6 +16,9 @@ long long getTimeNowDelta(long long offset)
 	return duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count() + offset;
 }
 
+bool timeHasPassed(long long timeNow,long long timestamp, long long offset) {
+	return timestamp + offset < timeNow;
+}
 bool timeHasPassed(long long timestamp, long long offset) {
 	return timestamp + offset < getTimeNow();
 }

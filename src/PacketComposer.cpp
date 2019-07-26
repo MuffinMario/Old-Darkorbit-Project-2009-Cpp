@@ -194,9 +194,12 @@ std::string CPacketComposer::buyRockets(rockettype_t rockettype, size_t amount)
 	return packet.pushAndGet(generateStringDeque(rockettype, amount));
 }
 
-std::string CPacketComposer::setOrePrices()
+std::string CPacketComposer::setOrePrices(credits_t prometium, credits_t endurium, credits_t terbium,
+	credits_t prometid, credits_t duranium,
+	credits_t promerium)
 {
-	return std::string();
+	CPacketer packet(STATION_SETPRICES);
+	return packet.pushAndGet(generateStringDeque(prometium, endurium, terbium, prometid, duranium, promerium));
 }
 
 std::string CPacketComposer::setRocketPrices()

@@ -32,7 +32,7 @@ using std::clog;
 
 // TYPEDEF FOR CLEARANCE
 typedef std::pair<int, int> Position_t; //simple
-typedef unsigned short ore_t;
+typedef int ore_t;
 typedef int pos_t;
 typedef unsigned short speed_t;
 typedef int map_t;
@@ -50,12 +50,12 @@ typedef std::string clan_t;
 typedef std::string stationname_t;
 typedef int shield_t;
 typedef int health_t;
-typedef unsigned short cargo_t;
+typedef int cargo_t;
 typedef unsigned int ammo_t;
 typedef unsigned int rocket_t;
 typedef unsigned short weaponstate_t;
 typedef unsigned long long exp_t;
-typedef unsigned long long hon_t;
+typedef long long hon_t;
 typedef unsigned short level_t;
 typedef unsigned long long credits_t;
 typedef unsigned long long uri_t;
@@ -74,6 +74,7 @@ std::ostream& operator<<(std::ostream& os, Position_t pos);
 long long getTimeNow();
 long long getTimeNowDelta(long long offset);
 /* Returns true if timestamp+time is less than the current time in ms */
+bool timeHasPassed(long long timeNow,long long timestamp, long long offset);
 bool timeHasPassed(long long timestamp, long long offset);
 bool timeHasPassed(long long timestamp);
 template<typename T>

@@ -34,7 +34,7 @@ public:
 	void spawn(id_t to) override;
 	void spawn() override;
 	void collect(id_t playerid) override;
-
+	bool empty();
 	void onChangeToPublic();
 
 	static const collectable_t RESOURCE_BOX_DEFAULT_COLLECTABLE_ID = 1;

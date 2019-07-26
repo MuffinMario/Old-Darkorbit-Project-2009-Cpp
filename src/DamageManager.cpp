@@ -1,5 +1,10 @@
 #include "DamageManager.h"
 
+#include "RocketInfo.h"
+#include <map>
+
+extern std::map<rockettype_t, CRocketInfo> g_rocketinfo;
+
 damage_t CDamageManager::damageRocket(id_t id, ERocketType rockettype)
 {
 	if (missed()) {
@@ -7,19 +12,7 @@ damage_t CDamageManager::damageRocket(id_t id, ERocketType rockettype)
 	}
 
 	else {
-		damage_t baseDamage;
-
-		switch (rockettype) {
-		case ERocketType::R310:
-			baseDamage = 1000;
-			break;
-		case ERocketType::PLT2026:
-			baseDamage = 2000;
-			break;
-		case ERocketType::PLT2021:
-			baseDamage = 4000;
-			break;
-		}
+		damage_t baseDamage = g_rocketinfo[rockettype].getDamage();
 
 		return dmgdiff(baseDamage);
 	}

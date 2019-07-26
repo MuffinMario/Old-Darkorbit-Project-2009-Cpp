@@ -96,7 +96,7 @@ public:
 				return it;
 		}
 		dcout << "Could not find any session with mapid " << mapid << ". Creating new temp one" << cendl;
-		return createTempSession(mapid);
+		return createTempSession(mapid); // TODO MUTEX
 	}
 	void clearAll()
 	{
