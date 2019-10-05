@@ -8,18 +8,16 @@ Well as you might have already read the former text, this is a project I did to 
 
 1. spacemap server:
 This is the most important folder that contains the source of the project. You need three external libraries to run this project.
-  (installable by vcpkg)
-  - boost 1.70
-  - libconfig
-  (only manually installable (you must change the include/lib paths in the project))
-  - MySQL C Connector 6.1 (https://dev.mysql.com/downloads/connector/c/) (VERSIONID 50716)
+  - boost 1.70 (installable by vcpkg)
+  - libconfig (installable by vcpkg)
+  - MySQL C Connector 6.1 (https://dev.mysql.com/downloads/connector/c/) (VERSIONID 50716) (only manually installable (you must change the include/lib paths in the project))
  
 This project has been tested with both Debug and Release builds on x86 platforms. x64 has been untested.
 
 2. bin_swf:
 If you already have your own CMS to use, you can find all modified client side files, aswell as all related to those modified. These mainly include SWF files.
 3. htdocs:
-If you do not have your own CMS, use this htdocs folder for xampp to test out the server. All you have to do is start the server and open http://<host addr>/internalSpacemapTestUnique.php . You can chose between 10 test entities to play with. (database userids 1-10). You can add the paramter uid with a number reaching from 1-10 (e.g. http://<host addr>/internalSpacemapTestUnique.php?uid=2 lets you play the second testing unit). If no parameter is selected, every call to the webpage increases the id youre currently playing with.
+If you do not have your own CMS, use this htdocs folder for xampp to test out the server. All you have to do is start the server and open http://hostaddr/internalSpacemapTestUnique.php . You can chose between 10 test entities to play with. (database userids 1-10). You can add the paramter uid with a number reaching from 1-10 (e.g. http://hostaddr/internalSpacemapTestUnique.php?uid=2 lets you play the second testing unit). If no parameter is selected, every call to the webpage increases the id youre currently playing with.
 
 Sidenote: htdocs/swf_global is the same as bin_swf plus unused inventory related files.
 4. database:
