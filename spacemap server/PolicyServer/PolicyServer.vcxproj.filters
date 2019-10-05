@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien\Config">
+      <UniqueIdentifier>{f24cc2ae-98c0-4dd6-b3b9-20191114feec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server">
+      <UniqueIdentifier>{218b76af-5f16-447c-bbe9-8abfcb2b5e70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Core">
+      <UniqueIdentifier>{d1bf9349-61c4-49b4-9213-ae463d34904d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Core\Policy">
+      <UniqueIdentifier>{0c492307-d68b-47df-84fe-a44639bf80a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server">
+      <UniqueIdentifier>{38a16d74-9d39-4eb5-9558-70e1546a787f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Core">
+      <UniqueIdentifier>{89c3ee78-338c-4878-b0a2-8bf0040c6817}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Core\Policy">
+      <UniqueIdentifier>{fbcd37a5-577f-47ab-9a78-9b08f271a96e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PolicyMain.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="PolicyHandler.cpp">
+      <Filter>Quelldateien\Server\Core\Policy</Filter>
+    </ClCompile>
+    <ClCompile Include="PolicyServer.cpp">
+      <Filter>Quelldateien\Server\Core\Policy</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PolicyServerConfig.h">
+      <Filter>Headerdateien\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="PolicyHandler.h">
+      <Filter>Headerdateien\Server\Core\Policy</Filter>
+    </ClInclude>
+    <ClInclude Include="PolicyServer.h">
+      <Filter>Headerdateien\Server\Core\Policy</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PolicyServer.rc">
+      <Filter>Ressourcendateien</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\commonassets\favicon.ico">
+      <Filter>Ressourcendateien</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien\Config">
+      <UniqueIdentifier>{14190585-20c1-4ce9-b890-0b0a62e60d24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Database">
+      <UniqueIdentifier>{860d1753-c17c-409b-9767-33d32679685c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Database\Infos">
+      <UniqueIdentifier>{08dc73f2-c334-42c9-bd9e-b9b39fbb47f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Database\Core">
+      <UniqueIdentifier>{fbf2a24f-bba7-4036-91ba-f8283030b5d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server">
+      <UniqueIdentifier>{a9ac1a42-f240-46d6-b4f2-2c6e197886e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Movement">
+      <UniqueIdentifier>{75d3ac23-ffb8-43f0-8803-4f7f134bbf57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Objects">
+      <UniqueIdentifier>{070eb14d-ae21-4294-9a51-9c783f517743}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Objects\Collectable">
+      <UniqueIdentifier>{dda0411f-a802-430c-b4f4-e94aed2a4c89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Objects\Entity">
+      <UniqueIdentifier>{3201858f-6c88-40ae-9f60-d32648cac9de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Objects\Map">
+      <UniqueIdentifier>{807f28bb-e3c0-4446-8391-cd4bd5751c1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Fights">
+      <UniqueIdentifier>{e30e74c3-2f8e-4160-a719-c7573a1a8118}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Session">
+      <UniqueIdentifier>{91e23519-6d67-44ab-b6bc-0313485ea653}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Core">
+      <UniqueIdentifier>{36a05032-5682-4f2f-8c87-f999903af42f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Server\Core\Game">
+      <UniqueIdentifier>{8f975819-5a09-4709-be93-95521574d6c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Database">
+      <UniqueIdentifier>{f70e0700-415b-438d-a48c-fe5239181dd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server">
+      <UniqueIdentifier>{985a8712-a9d5-4c47-9d33-4e5d37a98078}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Database\Core">
+      <UniqueIdentifier>{ca7d0a10-5fb5-411a-94f4-8509d218b5db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Core">
+      <UniqueIdentifier>{4bd8a489-dd9b-4f54-9338-c136f7eaca8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Fights">
+      <UniqueIdentifier>{7cbf1508-a7e6-4ee0-aa22-4eb3d8d904d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Movement">
+      <UniqueIdentifier>{a2052bf4-689d-4160-9e72-f3e87ca046e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Objects">
+      <UniqueIdentifier>{23f1e3aa-ad4d-4705-89ea-7a9a1e361869}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Objects\Collectable">
+      <UniqueIdentifier>{92d64bcc-ca2a-46b4-a554-5191f3496cae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Objects\Entity">
+      <UniqueIdentifier>{a4a54cbe-adbe-4aef-98b7-39cf8db814a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Core\Game">
+      <UniqueIdentifier>{7ac48c61-c284-4ce3-95f7-8ecc92796e06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Objects\Session">
+      <UniqueIdentifier>{809d28b4-31a4-4e3d-94e2-def1372a43b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Server\Objects\Map">
+      <UniqueIdentifier>{3eed098a-9702-45b3-8721-0b3a0479b6b8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BonusBox.h">
+      <Filter>Headerdateien\Server\Objects\Collectable</Filter>
+    </ClInclude>
+    <ClInclude Include="Firework.h">
+      <Filter>Headerdateien\Server\Objects\Collectable</Filter>
+    </ClInclude>
+    <ClInclude Include="Ore.h">
+      <Filter>Headerdateien\Server\Objects\Collectable</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceBox.h">
+      <Filter>Headerdateien\Server\Objects\Collectable</Filter>
+    </ClInclude>
+    <ClInclude Include="Mob.h">
+      <Filter>Headerdateien\Server\Objects\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="MobWrapper.h">
+      <Filter>Headerdateien\Server\Objects\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Portal.h">
+      <Filter>Headerdateien\Server\Objects\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Station.h">
+      <Filter>Headerdateien\Server\Objects\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Collectable.h">
+      <Filter>Headerdateien\Server\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Headerdateien\Server\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>Headerdateien\Server\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Headerdateien\Server\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Headerdateien\Server\Session</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionsManager.h">
+      <Filter>Headerdateien\Server\Session</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionTickable.h">
+      <Filter>Headerdateien\Server\Session</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Enums.h">
+      <Filter>Headerdateien\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="MovementManager.h">
+      <Filter>Headerdateien\Server\Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="DamageManager.h">
+      <Filter>Headerdateien\Server\Fights</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerHandler.h">
+      <Filter>Headerdateien\Server\Core\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Handler.h">
+      <Filter>Headerdateien\Server\Core\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServer.h">
+      <Filter>Headerdateien\Server\Core\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServerConfig.h">
+      <Filter>Headerdateien\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="DBGetter.h">
+      <Filter>Headerdateien\Database\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DBUpdater.h">
+      <Filter>Headerdateien\Database\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="OreInfo.h">
+      <Filter>Headerdateien\Database\Infos</Filter>
+    </ClInclude>
+    <ClInclude Include="RocketInfo.h">
+      <Filter>Headerdateien\Database\Infos</Filter>
+    </ClInclude>
+    <ClInclude Include="ShipInfo.h">
+      <Filter>Headerdateien\Database\Infos</Filter>
+    </ClInclude>
+    <ClInclude Include="DatabaseUtils.h">
+      <Filter>Headerdateien\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="UsersDB.h">
+      <Filter>Headerdateien\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GameMain.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="DatabaseUtils.cpp">
+      <Filter>Quelldateien\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="DBGetter.cpp">
+      <Filter>Quelldateien\Database\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="DBUpdater.cpp">
+      <Filter>Quelldateien\Database\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="BonusBox.cpp">
+      <Filter>Quelldateien\Server\Objects\Collectable</Filter>
+    </ClCompile>
+    <ClCompile Include="Collectable.cpp">
+      <Filter>Quelldateien\Server\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="DamageManager.cpp">
+      <Filter>Quelldateien\Server\Fights</Filter>
+    </ClCompile>
+    <ClCompile Include="Firework.cpp">
+      <Filter>Quelldateien\Server\Objects\Collectable</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServer.cpp">
+      <Filter>Quelldateien\Server\Core\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Mob.cpp">
+      <Filter>Quelldateien\Server\Objects\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="MovementManager.cpp">
+      <Filter>Quelldateien\Server\Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="Ore.cpp">
+      <Filter>Quelldateien\Server\Objects\Collectable</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerHandler.cpp">
+      <Filter>Quelldateien\Server\Core\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceBox.cpp">
+      <Filter>Quelldateien\Server\Objects\Collectable</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>Quelldateien\Server\Objects\Session</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionsManager.cpp">
+      <Filter>Quelldateien\Server\Objects\Session</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>Quelldateien\Server\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Portal.cpp">
+      <Filter>Quelldateien\Server\Objects\Map</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GameServer.rc">
+      <Filter>Ressourcendateien</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\commonassets\favicon.ico">
+      <Filter>Ressourcendateien</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien\Config">
+      <UniqueIdentifier>{3188f87e-a0d3-4e92-a910-66d2f2d8b2fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\I/O">
+      <UniqueIdentifier>{9057b65b-9fb4-4702-90e8-f345e0483d3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\I/O\Color">
+      <UniqueIdentifier>{e15648ee-87b6-4bf3-8015-1ea7d57f4478}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Packet">
+      <UniqueIdentifier>{6f762917-fc6b-48e5-97bd-4867e0b13762}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Utils">
+      <UniqueIdentifier>{92916455-a544-429a-aa7f-04c54c9687e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Utils\Container">
+      <UniqueIdentifier>{1c3fc300-fed1-4d15-9f26-bac04f473982}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Utils\Threading">
+      <UniqueIdentifier>{2a744c24-b838-471c-98f2-974fd02c3111}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\I/O">
+      <UniqueIdentifier>{4b637926-1b9a-41cc-809e-84103072bd55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\I/O\Color">
+      <UniqueIdentifier>{7c385a9d-ab6a-4ef8-ab0e-8b036f9d8919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Packet">
+      <UniqueIdentifier>{82578db0-12b1-4b07-8d0d-e594b6e885b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Utils">
+      <UniqueIdentifier>{fc650d6f-730c-471a-94b5-a5b2c33ef960}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Utils\Container">
+      <UniqueIdentifier>{7b2734e6-03fa-43af-ac46-16b9b4426f19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Utils\Threading">
+      <UniqueIdentifier>{d9f34923-4d82-46ce-84d2-d5987488b62b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>Headerdateien\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketComposer.h">
+      <Filter>Headerdateien\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="Packeter.h">
+      <Filter>Headerdateien\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="FileWriter.h">
+      <Filter>Headerdateien\I/O</Filter>
+    </ClInclude>
+    <ClInclude Include="FileReader.h">
+      <Filter>Headerdateien\I/O</Filter>
+    </ClInclude>
+    <ClInclude Include="coutcolor.h">
+      <Filter>Headerdateien\I/O\Color</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>Headerdateien\I/O\Color</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadSafeHashTable.h">
+      <Filter>Headerdateien\Utils\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkerThreadPool.h">
+      <Filter>Headerdateien\Utils\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>Headerdateien\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigNotAllValuesInitalizedException.h">
+      <Filter>Headerdateien\Config</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="common.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Color.cpp">
+      <Filter>Quelldateien\I/O\Color</Filter>
+    </ClCompile>
+    <ClCompile Include="coutcolor.cpp">
+      <Filter>Quelldateien\I/O\Color</Filter>
+    </ClCompile>
+    <ClCompile Include="FileReader.cpp">
+      <Filter>Quelldateien\I/O</Filter>
+    </ClCompile>
+    <ClCompile Include="FileWriter.cpp">
+      <Filter>Quelldateien\I/O</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkerThreadPool.cpp">
+      <Filter>Quelldateien\Utils\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketComposer.cpp">
+      <Filter>Quelldateien\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="Packeter.cpp">
+      <Filter>Quelldateien\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="Defines.cpp">
+      <Filter>Quelldateien\Utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="coutcolor.tpp">
+      <Filter>Quelldateien\I/O\Color</Filter>
+    </None>
+    <None Include="Defines.tpp">
+      <Filter>Quelldateien\Utils</Filter>
+    </None>
+  </ItemGroup>
+</Project>
