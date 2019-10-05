@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<xml>
+	<game>
+		<core>
+			<variable key="chatGFX" value="skin/chatgfx_darkorbit.swf"/>
+			<variable key="stylesPath" value="skin/styles_darkorbit.css"/>
+		</core>
+		<vars>
+			<variable key="chatXPosition" value="0"/>
+      			<variable key="chatYPosition" value="500"/>
+			
+			<!-- TEXT INPUT FIELD -->
+			<variable key="inputFontFace" value="Verdana"/>
+			<variable key="inputFontSize" value="11"/>
+			<variable key="inputFontColor" value="0xffffff"/>
+			<variable key="inputFontBold" value="true"/>
+			<variable key="InputField_XPos" value="12"/>
+			<variable key="InputField_YPos" value="-26"/>
+
+			<!-- TEXT OUTPUT FIELD -->
+			<!-- line gap for the output window -->
+			<variable key="lineGap" value="-3"/>
+			<!-- min/max allowed size for the textsize in options dialog -->
+			<variable key="minTextSize" value="10"/>
+			<variable key="maxTextSize" value="16"/>
+
+			<!-- TAB BAR -->
+			<variable key="showTabBar" value="true"/>
+			<variable key="tabBar_XPos" value="10"/>
+			<variable key="tabBar_YPos" value="1"/>
+			<variable key="tabBar_TextField_YPos" value="-2"/>
+			<variable key="tabFontFace" value="Arial"/>
+			<variable key="tabFontSize" value="10"/>
+			<variable key="tabFontNormalColor" value="0xffffff"/>
+			<variable key="tabFontSelectedColor" value="0xffff00"/>
+			<variable key="tabGap" value="5"/>
+			
+			<!-- BUTTON POSITIONS -->
+			<!-- relative postion from top right window corner -->
+			<variable key="minMaxButton_XPos" value="6"/>
+			<variable key="minMaxButton_YPos" value="5"/>
+			<!-- relative postion from top right window corner -->
+			<variable key="closeButton_XPos" value="18"/>
+			<variable key="closeButton_YPos" value="5"/>
+			<!-- relative postion from bottom right window corner -->
+			<variable key="optionsButton_XPos" value="32"/>
+			<variable key="optionsButton_YPos" value="5"/>
+
+			<!-- MISC PROPERTIESS -->
+			<variable key="smoothAnimations" value="true"/>
+			<variable key="showMaximizeButton" value="true"/>
+			<variable key="showMinimizeButton" value="true"/>
+			<variable key="draggable" value="true"/>
+			<variable key="resizable" value="true"/>
+			<variable key="tileBackground" value="false"/>
+			<!-- if true, text size options will be saved in a cookie -->
+			<variable key="loadTextSizeOptions" value="true"/>
+			<!-- properties of the chat window -->
+			<variable key="minWindowWidth" value="250"/>
+			<variable key="maxWindowWidth" value="618"/>
+			<variable key="minWindowHeight" value="153"/>
+			<variable key="maxWindowHeight" value="623"/>
+            		<variable key="minimizedChat_XPos" value="0"/>
+			<variable key="minimizedChat_YPos" value="610"/>	
+			<!-- docking of chat window, can be left, right,top, bottom, or false -->
+			<variable key="docking_horizontal" value="left"/>
+			<variable key="docking_vertical" value="bottom"/>
+            
+		</vars>
+	</game>
+</xml>

@@ -1,0 +1,34 @@
+Options +FollowSymLinks
+AuthType Basic
+AuthName "Your authorization required message."
+AuthUserFile ../htpasspath/.htpasswd
+require valid-user
+RewriteEngine on
+## RewriteCond %{HTTPS} !=on
+## RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+ErrorDocument 400 /error.php?e=400
+ErrorDocument 401 /error.php?e=401
+ErrorDocument 403 /error.php?e=403
+ErrorDocument 404 /error.php?e=404
+ErrorDocument 500 /error.php?e=500
+## USER IP BANNING
+<Limit GET POST>
+ order allow,deny
+ #deny from 127.0.0.1
+ #deny from 127.0.0.1
+ allow from all
+</Limit>
+
+RewriteRule ^indexInternal.es$ indexInternal.php [L]
+RewriteRule ^intexInternal.es$ indexInternal.php [L]
+RewriteRule ^index.es$ doLogout.php?doLogout=true [L]
+RewriteRule ^gameserver.es$ /www/gameserver.php [L]
+RewriteRule ^getflashres.es$ /www/getflashres.php [L]
+
+
+#RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.php [NC]
+#RewriteRule ^ %1 [R,L,NC]
+
+#RewriteCond %{REQUEST_FILENAME}.php -f
+#RewriteRule ^ %{REQUEST_URI}.php [L]

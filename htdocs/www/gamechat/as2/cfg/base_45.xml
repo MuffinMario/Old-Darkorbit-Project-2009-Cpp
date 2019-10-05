@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<xml>
+    <variable key="host" value="212.48.117.10"/>
+    <variable key="port" value="9338"/>
+</xml>

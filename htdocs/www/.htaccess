@@ -1,0 +1,9 @@
+#Options +FollowSymLinks
+#Snowy's Rewrite :)
+RewriteEngine on
+
+RewriteRule ^gameserver.es$ /gameserver.php [L]
+RewriteRule ^getflashres.es$ /getflashres.php [L]
+RewriteRule ^indexInternal.es$ /spaceSystemOld.php [L]
+
+
