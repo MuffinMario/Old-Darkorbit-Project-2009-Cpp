@@ -637,7 +637,6 @@ void CMob::secondTick(long long timeNow, CSession& currentSession)
 		if (player != nullptr && player->isInPeaceZone()) 
 		{
 			abort();
-			setLastTimeShotByBelongedPlayer(0LL);
 			setFocusToPlayer(0);
 		}
 		
