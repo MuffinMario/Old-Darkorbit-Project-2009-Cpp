@@ -163,6 +163,7 @@ loc39da:
 										HON|amount|total
 										XEN
 										
+0|n|w|0                                                  Warning Bar on minimap change last variable for change level warn bar.
 
 0|y|BTB									Box to big
 
