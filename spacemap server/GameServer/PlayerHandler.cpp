@@ -690,7 +690,7 @@ void CPlayerHandler::loginPlayer() {
 		checkForObjectsToInteract();
 
 		/* Send build strings packets*/
-		sendPacketSynchronous("0|A|SET|1|1|1|1|1|1|1|1|1|1|1|1|0|1|1|1|1|1|1|1|1|0|0|0|0");
+		sendPacketSynchronous("0|A|SET|1|1|1|1|1|1|1|1|1|1|1|1|0|1|1|1|1|1|1|1|1|0|0|0|1");
 		sendPacketSynchronous("0|u|1"); // TODO: dbutils chosen laser
 		sendPacketSynchronous("0|d|1"); // TODO: dbutils chosen rocket
 		sendPacketSynchronous(initalisepacket);
@@ -698,6 +698,7 @@ void CPlayerHandler::loginPlayer() {
 		sendPacketSynchronous(map_m);
 		sendPacketSynchronous("0|B|2|3|4|7|8"); // TODO: dbutils getammo laserid
 		sendPacketSynchronous("0|3|1|2|3"); // TODO: dbutils getrocket rocketid
+		sendPacketSynchronous("0|g|a|b,1000,1,10000,C,2,500,U,3,1000,U,5,1000,U|r,100,1,10000,C,2,50000,C,3,500,U"); //SetPriceAMMO
 		updateCargo(); //async
 		sendPacketSynchronous("0|S|CFG|1"); // TODO: a   l o t   o f   d b   s t u f f
 		setResourcePrices();
@@ -769,6 +770,7 @@ void CPlayerHandler::jump(map_t wantedMapID, pos_t dest_x, pos_t dest_y) {
 		sendPacketSynchronous(updateOres);
 		sendPacketSynchronous("0|B|2|3|4|7|8");
 		sendPacketSynchronous("0|3|1|2|3");
+		sendPacketSynchronous("0|g|a|b,1000,1,10001,C,2,500,U,3,1000,U,5,1000,U|r,100,1,10000,C,2,50000,C,3,500,U"); //SetPriceAMMO
 		sendPacketSynchronous("0|8");
 		sendPacketSynchronous("0|A|RCD"); // rocket cooldown reset due to jump interrupt
 		setResourcePrices();
