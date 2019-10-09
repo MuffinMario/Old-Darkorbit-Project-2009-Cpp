@@ -633,6 +633,14 @@ void CMob::secondTick(long long timeNow, CSession& currentSession)
 		attacking())
 	{
 		auto player = currentSession.getHandler(getFocusedPlayer());
+		/* Abort if player on demilitarized zone */
+		if (player != nullptr && player->isInPeaceZone()) 
+		{
+			abort();
+			setLastTimeShotByBelongedPlayer(0LL);
+			setFocusToPlayer(0);
+		}
+		
 		if (player) {
 			Position_t alienpos = getPosition();
 			Position_t userpos =
