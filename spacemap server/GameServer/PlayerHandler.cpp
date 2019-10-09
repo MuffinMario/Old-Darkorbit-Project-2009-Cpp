@@ -1545,8 +1545,13 @@ void CPlayerHandler::handle_read_b(size_t bytes)
 					}
 					else if (packetIs(SPECIAL))
 					{
+						
+                                               if (packetIsLevel(SPECIAL_MINE, 1)) {
+							//std::string minePacket = Constants::Send::DETONATEMINE + "1/1";
+							//sendPacket(minePacket);
+					       }
 
-						if (packetIsLevel(SPECIAL_SMARTBOMB, 1)) {
+					           else if (packetIsLevel(SPECIAL_SMARTBOMB, 1)) {
 							//high priority
 							long long SMB_CD_MS = 10000; // TODO <- premium? other stuff?
 							if (timeHasPassed(m_smb_next_use))
