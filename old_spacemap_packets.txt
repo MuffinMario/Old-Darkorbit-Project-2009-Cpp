@@ -139,7 +139,7 @@ loc39da:
 
 0|2|int									remove box 
 
-0|y||type|num1|num2|num3|...ores|ores...
+0|y|type|num1|num2|num3|num...
 										type = 	CAR = cargo
 												JPE = jackpot
 												CRE = credits
